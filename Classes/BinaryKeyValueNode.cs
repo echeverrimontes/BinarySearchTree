@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace binaryTreeExample.Classes
 {
-    class BinaryKeyValueNode<Tkey, Tvalue> where Tkey : IComparable<Tkey>
+    public class BinaryKeyValueNode<Tkey, Tvalue> where Tkey : IComparable<Tkey>
     {
         public Tkey Key { get; set; }
         public Tvalue Value { get; set; }

@@ -66,7 +66,7 @@ namespace binaryTreeExample.Classes
             return node == null ? default(TValue) : node.Value;
         }
 
-        private BinaryKeyValueNode<TKey, TValue> FindNode(TKey key, bool ExceptionIfKeyNotFound = true)
+        public BinaryKeyValueNode<TKey, TValue> FindNode(TKey key, bool ExceptionIfKeyNotFound = true)
         {
             BinaryKeyValueNode<TKey, TValue> current = Root;
             while (current != null)
@@ -85,7 +85,7 @@ namespace binaryTreeExample.Classes
                 return null;
         }
 
-        private void DeleteNode(BinaryKeyValueNode<TKey, TValue> node)
+        public void DeleteNode(BinaryKeyValueNode<TKey, TValue> node)
         {
             if (node == null)
                 throw new ArgumentNullException();

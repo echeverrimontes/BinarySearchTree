@@ -65,19 +65,16 @@ namespace binaryTreeExample.Commands
                 //to access the neighbors of a given segment S so that they can be tested for intersection
                 //the status structure must be dynamic: inserted and deleted segments as they appear and disappear
 
-                    Point3d temp = Q.Dequeue();
-                    Curve tempCrv = S[j];
-                    Point3d intPoint = HandleEventPoint.IntersectionPt(temp, T, tempCrv);
-                    if (intPoint != null)
-                    {
-                        intPoints.Add(intPoint);
-                    }
+                Point3d temp = Q.Dequeue();
+                Curve tempCrv = S[j];
+                T.Insert(temp.X, tempCrv);
+                Point3d intPoint = HandleEventPoint.IntersectionPt(temp, T, tempCrv);
+                if (intPoint != null)
+                {
+                    intPoints.Add(intPoint);
+                }
             }
 
-
-
-
-            /*
             RhinoApp.WriteLine();
             int depth = T.Count;
             RhinoApp.WriteLine(depth.ToString());
@@ -112,7 +109,7 @@ namespace binaryTreeExample.Commands
                 double qY = Math.Round(pt.Y, 2);
                 RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
             }
-            */
+
             RhinoApp.WriteLine();
 
             RhinoApp.Write("intPoints: ");

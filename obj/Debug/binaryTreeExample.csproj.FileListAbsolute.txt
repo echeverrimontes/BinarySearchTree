@@ -4,3 +4,8 @@ C:\Users\echeverrimontes\source\repos\binaryTreeExample\obj\Debug\binaryTreeExam
 C:\Users\echeverrimontes\source\repos\binaryTreeExample\obj\Debug\binaryTreeExample.csproj.CoreCompileInputs.cache
 C:\Users\echeverrimontes\source\repos\binaryTreeExample\obj\Debug\binaryTreeExample.dll
 C:\Users\echeverrimontes\source\repos\binaryTreeExample\obj\Debug\binaryTreeExample.pdb
+C:\Users\Paula\Documents\GitHub\BinarySearchTree\bin\binaryTreeExample.dll
+C:\Users\Paula\Documents\GitHub\BinarySearchTree\bin\binaryTreeExample.pdb
+C:\Users\Paula\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.csprojAssemblyReference.cache
+C:\Users\Paula\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.dll
+C:\Users\Paula\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.pdb

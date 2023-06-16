@@ -27,6 +27,7 @@ namespace binaryTreeExample.Classes
 
             //2. list of points existing in the selection: select segment start and end points
             Point3d[] Qs = new Point3d[lineCurves.Count * 2];
+            double[] QsY = new double[lineCurves.Count * 2];
             int n = Qs.Length;
 
             //3. initialize an empty list of max and mins
@@ -36,21 +37,24 @@ namespace binaryTreeExample.Classes
             Point3d ptEnd;
 
             int i = 0;
+            int j = lineCurves.Count;
 
             foreach (Curve crv in lineCurves) // generate the array of points by selecting and inserting the point from segment
             {
                 ptStart = crv.PointAtStart;
-                ptEnd = crv.PointAtEnd;
                 Qs[i] = ptStart;
-                Qs[i + 1] = ptEnd;
-
-               
-                if (i < Qs.Length -1)
-                    i += 2;
+                QsY[i] = ptStart.Y;
+                ptEnd = crv.PointAtEnd;
+                Qs[j] = ptEnd;
+                QsY[j] = ptEnd.Y;
+                j += 1;
+                i += 1;
             }
 
             //4. sort lists based on the y coordinate value and Queue the points in order according to y coordinate
-            IntArrayInsertionSort(Qs); // sorted array according to the Y coordinate
+            Array.Sort(QsY, Qs);
+            Array.Reverse(Qs);
+            //IntArrayQuickSort(Qs); // sorted array according to the Y coordinate
 
             //5. enqueue the points in order of appearance from top to bottom
             //if two event points have the same y-coordinate, then the one with smallest x-coordinate will be the first
@@ -400,9 +404,9 @@ namespace binaryTreeExample.Classes
             x = data[(l + r) / 2]; /* find pivot item */
             while (true)
             {
-                while (data[i] < x)
+                while (data[i].Y < x.Y)
                     i++;
-                while (x < data[j])
+                while (x.Y < data[j].Y)
                     j--;
                 if (i <= j)
                 {
@@ -428,18 +432,30 @@ namespace binaryTreeExample.Classes
         /// Order the data according to y coordinate from a disordered list of segments and start and end points
         /// </summary>
         /// <param name="data"></param>
-        public static void IntArrayInsertionSort(Point3d[] data) 
+        public static void IntArrayInsertionSort(Point3d[] data) // sort in y coordinate order
         {
             int i, j;
-            int N = data.Length;
+            int n = data.Length;
 
-            for (j = 1; j < N; j++)
+            for (j = 1; j < n; j++)
             {
                 for (i = j; i > 0 && data[i].Y > data[i - 1].Y; i--)
                 {
                     Exchange(data, i, i - 1);
                 }
             }
+        }
+
+        public static Point3d NewEvent(Curve sl, Curve sr, Point3d p)
+        {
+            Point3d intPoint;
+            if (true) // sl and sr intersect below sweep line, or on it and to the right of the current event point
+            {
+                intPoint = p;
+                
+            }
+
+            return intPoint;
         }
     }
 }
