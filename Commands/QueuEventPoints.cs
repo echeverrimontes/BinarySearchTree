@@ -62,7 +62,7 @@ namespace binaryTreeExample.Commands
             for (int j = 0; j < Q.Count; j++) //event queue - sweep line
             {
                 //status structure T is an ordered sequence of segments intersecting the sweep line at each moment
-                //to access the neighbors of a given segment S so that they can be tested for intersection
+                //to access the neighbours of a given segment S so that they can be tested for intersection
                 //the status structure must be dynamic: inserted and deleted segments as they appear and disappear
 
                 Point3d temp = Q.Dequeue();
@@ -82,7 +82,7 @@ namespace binaryTreeExample.Commands
             IEnumerable inOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
             foreach (Double i in inOrder)
             {
-                RhinoApp.WriteLine("(" + i.ToString()+", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
+                RhinoApp.WriteLine("(" + Math.Round(i, 2).ToString()+", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
             }
 
             RhinoApp.WriteLine();
@@ -90,7 +90,7 @@ namespace binaryTreeExample.Commands
             IEnumerable postOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.PostOrder);
             foreach (Double i in postOrder)
             {
-                RhinoApp.WriteLine("(" + i.ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
+                RhinoApp.WriteLine("(" + Math.Round(i, 2).ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
             }
 
             RhinoApp.WriteLine();
@@ -98,7 +98,7 @@ namespace binaryTreeExample.Commands
             IEnumerable preOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.PreOrder);
             foreach (Double i in preOrder)
             {
-                RhinoApp.WriteLine("(" + i.ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
+                RhinoApp.WriteLine("(" + Math.Round(i, 2).ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
             }
 
             RhinoApp.WriteLine();
@@ -112,7 +112,8 @@ namespace binaryTreeExample.Commands
 
             RhinoApp.WriteLine();
 
-            RhinoApp.Write("intPoints: ");
+            RhinoApp.Write("intPoints: {0} ", intPoints.Count.ToString());
+            /*
             foreach (Point3d pt in intPoints)
             {
                 double ptX = Math.Round(pt.X, 2);
@@ -120,7 +121,7 @@ namespace binaryTreeExample.Commands
                 RhinoApp.Write("(" + ptX.ToString() + "," + ptY.ToString() + ") ");
                 doc.Objects.AddPoint(pt);
             }
-
+            */
             doc.Views.Redraw();
 
             return Result.Success;

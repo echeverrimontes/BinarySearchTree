@@ -38,18 +38,15 @@ namespace binaryTreeExample.Classes
         public static Point3d IntersectionPt(Point3d p, BinarySearchTreeKV<double, Curve> T, Curve crv)
         {
             Point3d intPoint = new Point3d();
-            //Curve upper;
-            //Curve lower;
-            //Curve contain;
             
             //U(p) segments whose upper end point is p
-            List<BinaryKeyValueNode<double, Curve>> U = new List<BinaryKeyValueNode<double, Curve>>();
-            BinaryKeyValueNode<double, Curve> upper;
+            List<Curve> U = new List<Curve>();
+            //BinaryKeyValueNode<double, Curve> upper;
             //L(p) segments whose lower end point is p
-            List<BinaryKeyValueNode<double, Curve>> L = new List<BinaryKeyValueNode<double, Curve>>();
+            List<Curve> L = new List<Curve>();
             BinaryKeyValueNode<double, Curve> lower;
             //C(p) segments that contain p in their interior
-            List<BinaryKeyValueNode<double, Curve>> C = new List<BinaryKeyValueNode<double, Curve>>();
+            List<Curve> C = new List<Curve>();
             BinaryKeyValueNode<double, Curve> contain;
 
             //line function to determine if pt lays in the segment - y = mx + b, where m is equal to the slope and b i the intersection with y axis
@@ -60,44 +57,48 @@ namespace binaryTreeExample.Classes
             
             if (crv != null)
             {
+                // Find all segments stored in T that contain p
+                // BinaryKeyValueNode<double, Curve> node = T.FindNode(p.X);
+
                 if (crv.PointAtStart.Y == p.Y)
                 {
-                    BinaryKeyValueNode<double, Curve> u = T.FindNode(p.X);
-                    upper = new BinaryKeyValueNode<double, Curve>(p.X, crv);
-                    U.Add(upper);
+                    //Curve u = T.FindFirst(p.X);
+                    U.Add(crv);
                 }
                 else if (crv.PointAtEnd.Y == p.Y)
                 {
-                    BinaryKeyValueNode<double, Curve> l = T.FindNode(p.X);
-                    lower = new BinaryKeyValueNode<double, Curve>(p.X, crv);
-                    L.Add(lower);
+                    //Curve l = T.FindFirst(p.X);
+                    L.Add(crv);
                 }
                 else if (p.Y == m * p.X + b)
                 {
-                    BinaryKeyValueNode<double, Curve> c = T.FindNode(p.X);
-                    contain = new BinaryKeyValueNode<double, Curve>(p.X, crv);
-                    C.Add(contain);
+                    //Curve c = T.FindFirst(p.X);
+                    C.Add(crv);
                 }
-                
-                //if L(p) U U(p) U C(p) => more than one segment where there is an intersection
-                int segmentIntCount = U.Count + L.Count + C.Count;
-                if (segmentIntCount > 1)
-                {
-                    // report p as an intersection
-                    intPoint = p;
-                    // report set of segments L(p) U(p) C(p)
-                    // delete segments in L(p) and C(p) due to their intersection
-                    //T.DeleteNode(lower);
-                    //T.DeleteNode(contain);
+            }
 
-                    /*
-                    int segIntCount = U.Count + C.Count;
-                    if (segIntCount == 0)
-                    {
-                        UsefulFunctions.NewEvent();
-                    }
-                    */
-                }
+            // if L(p) U U(p) U C(p) => more than one segment where there is an intersection
+            // int segmentIntCount = U.Count + L.Count + C.Count;
+            // in a list of objects (Curve) -not structs (or strings)- then intersect their keys first, 
+            // and then select objects by those keys:
+
+            //double keys = p.Select(x => x.Id).Intersect(list2.Select(x => x.Id));
+            //Curve value = crv.Where(x => ids.Contains(x.Id));
+
+            if (U.Contains(crv)) // revisar la condición para la intersección de las listas
+            {
+                // report p as an intersection
+                intPoint = p;
+                // report set of segments L(p) U(p) C(p)
+                // delete segments in L(p) U C(p) due to their intersection
+                lower = new BinaryKeyValueNode<double, Curve>(p.X, L[0]);
+                contain = new BinaryKeyValueNode<double, Curve>(p.X, C[0]);
+                T.DeleteNode(lower);
+                T.DeleteNode(contain);
+
+                // insert the segments U(p) U C(p) into T
+                T.Insert(p.X, U[0]);
+                T.Insert(p.X, C[0]);
             }
 
             return intPoint;
