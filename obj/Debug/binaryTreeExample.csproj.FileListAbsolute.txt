@@ -9,3 +9,9 @@ C:\Users\Paula\Documents\GitHub\BinarySearchTree\bin\binaryTreeExample.pdb
 C:\Users\Paula\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.csprojAssemblyReference.cache
 C:\Users\Paula\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.dll
 C:\Users\Paula\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.pdb
+C:\Users\echeverrimontes\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.csproj.AssemblyReference.cache
+C:\Users\echeverrimontes\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.csproj.CoreCompileInputs.cache
+C:\Users\echeverrimontes\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.dll
+C:\Users\echeverrimontes\Documents\GitHub\BinarySearchTree\obj\Debug\binaryTreeExample.pdb
+C:\Users\echeverrimontes\Documents\GitHub\BinarySearchTree\bin\binaryTreeExample.dll
+C:\Users\echeverrimontes\Documents\GitHub\BinarySearchTree\bin\binaryTreeExample.pdb

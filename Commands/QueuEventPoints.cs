@@ -7,6 +7,7 @@ using System.Linq;
 using binaryTreeExample.Classes;
 using Eto.Forms;
 using Rhino.Geometry;
+using Rhino.Geometry.Intersect;
 using Command = Rhino.Commands.Command;
 
 namespace binaryTreeExample.Commands
@@ -68,13 +69,13 @@ namespace binaryTreeExample.Commands
                 Point3d temp = Q.Dequeue();
                 Curve tempCrv = S[j];
                 T.Insert(temp.X, tempCrv);
-                Point3d intPoint = HandleEventPoint.IntersectionPt(temp, T, tempCrv);
-                if (intPoint != null)
+                List<Point3d> intPoint = HandleEventPoint.IntersectionPt(temp, T); // intersection events
+                foreach (var p in intPoint)
                 {
-                    intPoints.Add(intPoint);
+                    Q.Enqueue(p); // Point of intersection 
                 }
             }
-
+            /*
             RhinoApp.WriteLine();
             int depth = T.Count;
             RhinoApp.WriteLine(depth.ToString());
@@ -109,18 +110,20 @@ namespace binaryTreeExample.Commands
                 double qY = Math.Round(pt.Y, 2);
                 RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
             }
-
+            */
             RhinoApp.WriteLine();
 
             RhinoApp.Write("intPoints: ");
+
             foreach (Point3d pt in intPoints)
             {
                 double ptX = Math.Round(pt.X, 2);
                 double ptY = Math.Round(pt.Y, 2);
                 RhinoApp.Write("(" + ptX.ToString() + "," + ptY.ToString() + ") ");
+
                 doc.Objects.AddPoint(pt);
             }
-
+            
             doc.Views.Redraw();
 
             return Result.Success;
