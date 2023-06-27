@@ -98,7 +98,7 @@ namespace binaryTreeExample.Classes
             }
             else //1 or less childs  
             {
-                var child = node.LeftChild == null ? node.RightChild : node.LeftChild;
+                BinaryKeyValueNode<TKey, TValue> child = node.LeftChild == null ? node.RightChild : node.LeftChild;
                 if (node.Parent.RightChild == node)
                     node.Parent.RightChild = child;
                 else

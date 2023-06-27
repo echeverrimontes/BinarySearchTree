@@ -42,11 +42,59 @@ namespace binaryTreeExample.Classes
 
         public static List<Point3d> IntersectionPt(Point3d p, BinarySearchTreeKV<double, Curve> T)
         {
+            // an event point p determines the status of the sweep line, 
+            // right below the sweepline there is an intersection point pInt where
+            // Si and Sj become adjacent and thus are tested for intersection
+            // only intersections below sweepline are important. They constitute a new event point
+            // maintain the ordered sequence of segments
+
             // initialize intersection point
             CurveIntersections intPointl = null;
             CurveIntersections intPointr = null;
             List<Point3d> pts = null;
 
+            if (T != null)
+            {
+                // identify adjacency by way of the left and right nodes of the binary tree T
+                BinaryKeyValueNode<double, Curve> node = T.FindNode(p.X);
+                BinaryKeyValueNode<double, Curve> leftChild = node.LeftChild;
+                BinaryKeyValueNode<double, Curve> rightChild = node.RightChild;
+
+                if (leftChild != null)
+                {
+                    intPointl = Intersection.CurveCurve(node.Value, leftChild.Value, 0.001, 0.01);
+                    IEnumerator<IntersectionEvent> intPointsl = intPointl.GetEnumerator();
+                    if (intPointsl != null)
+                    {
+                        while (intPointsl.MoveNext())
+                        {
+                            IntersectionEvent pt = intPointsl.Current;
+                            Point3d intersectl = pt.PointA;
+                            pts.Add(intersectl);
+                        }
+                    }
+                }
+
+                if (rightChild != null)
+                {
+                    intPointr = Intersection.CurveCurve(node.Value, rightChild.Value, 0.001, 0.01);
+                    IEnumerator<IntersectionEvent> intPointsr = intPointl.GetEnumerator();
+                    if (intPointsr != null)
+                    {
+                        while (intPointsr.MoveNext())
+                        {
+                            IntersectionEvent pt = intPointsr.Current;
+                            Point3d intersectr = pt.PointA;
+                            pts.Add(intersectr);
+                        }
+                    }
+                }
+            }
+            /*
+            // initialize intersection point
+            CurveIntersections intPointl = null;
+            CurveIntersections intPointr = null;
+            List<Point3d> pts = null;
             //U(p) segments whose upper end point is p
             List<BinaryKeyValueNode<double, Curve>> U = new List<BinaryKeyValueNode<double, Curve>>();
             //L(p) segments whose lower end point is p
@@ -67,13 +115,23 @@ namespace binaryTreeExample.Classes
                 BinaryKeyValueNode<double, Curve> leftChild = node.LeftChild;
                 BinaryKeyValueNode<double, Curve> rightChild = node.RightChild;
 
-                if (node.Value.PointAtStart.Y == p.Y)
+                /*
+                if (Math.Round(node.Value.PointAtStart.Y, 2) == Math.Round(p.Y, 2))
                 {
                     U.Add(node);
+                    RhinoApp.WriteLine();
+                    RhinoApp.Write("U(p): ");
+                    double pX = Math.Round(p.X, 2);
+                    double pY = Math.Round(p.Y, 2);
+                    RhinoApp.Write("(" + pX.ToString() + "," + pY.ToString() + ") ");
                 }
-                else if (node.Value.PointAtEnd.Y == p.Y)
+                else if (Math.Round(node.Value.PointAtEnd.Y, 2) == Math.Round(p.Y, 2))
                 {
                     L.Add(node);
+                    RhinoApp.Write("L(p): ");
+                    double pX = Math.Round(p.X, 2);
+                    double pY = Math.Round(p.Y, 2);
+                    RhinoApp.Write("(" + pX.ToString() + "," + pY.ToString() + ") ");
                 }
 
                 if (leftChild != null)
@@ -152,7 +210,7 @@ namespace binaryTreeExample.Classes
                     //intPoint = new Point3d(5, 13, 0);
                 }
             }
-
+            */
             return pts;
         }
     }

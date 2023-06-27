@@ -46,7 +46,7 @@ namespace binaryTreeExample.Commands
             //the status of the sweep line is the set of segments intersecting it
             //only at particular points is and update of the status needed: event points (in this algorithm the end points of the segments) 
             Queue<Point3d> Q = new Queue<Point3d>();
-            Q = UsefulFunctions.SweepLineDomain(S, doc); // and ordered queue according to the y coordinate - regarding the sweep line
+            Q = UsefulFunctions.EventPointQueue(S, doc); // and ordered queue according to the y coordinate - regarding the sweep line
 
             RhinoApp.WriteLine();
             RhinoApp.Write("Q: {0} ", Q.Count.ToString());
@@ -59,21 +59,55 @@ namespace binaryTreeExample.Commands
 
             //5. populate the binary tree T with reference to the queue Q in a dynamic way while following the sweep line
 
+            int j = 0;
             List<Point3d> intPoints = new List<Point3d>();
-            for (int j = 0; j < Q.Count; j++) //event queue - sweep line
+
+            //U(p) segments whose upper end point is p
+            List<BinaryKeyValueNode<double, Curve>> U = new List<BinaryKeyValueNode<double, Curve>>();
+            //L(p) segments whose lower end point is p
+            List<BinaryKeyValueNode<double, Curve>> L = new List<BinaryKeyValueNode<double, Curve>>();
+            //C(p) segments that contain p in their interior
+            List<BinaryKeyValueNode<double, Curve>> C = new List<BinaryKeyValueNode<double, Curve>>();
+
+            while (Q.Count > 0) //event queue - sweep line
             {
                 //status structure T is an ordered sequence of segments intersecting the sweep line at each moment
                 //to access the neighbors of a given segment S so that they can be tested for intersection
                 //the status structure must be dynamic: inserted and deleted segments as they appear and disappear
 
                 Point3d temp = Q.Dequeue();
-                Curve tempCrv = S[j];
-                T.Insert(temp.X, tempCrv);
-                List<Point3d> intPoint = HandleEventPoint.IntersectionPt(temp, T); // intersection events
-                foreach (var p in intPoint)
+                foreach (Curve crv in S)
                 {
-                    Q.Enqueue(p); // Point of intersection 
+                    // insert segments at start point and test intersection with adjacent segments in T
+                    if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
+                    {
+                        BinaryKeyValueNode<double, Curve> node = new BinaryKeyValueNode<double, Curve>(temp.X, crv);
+                        U.Add(node);
+                        T.Insert(temp.X, crv);
+                        doc.Objects.AddPoint(temp);
+                        // event points known beforehand / intersections points computed in the fly
+                        // intersection points: test on the two segments immediately left & right
+                        intPoints = HandleEventPoint.IntersectionPt(temp, T);
+                        if (intPoints != null)
+                        {
+                            foreach (Point3d pt in intPoints)
+                            {
+                                doc.Objects.AddPoint(pt);
+                                Q.Enqueue(pt);  
+                            }
+                        }
+                    }
+
+                    // delete segments at end points
+                    if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+                    {
+                        BinaryKeyValueNode<double, Curve> node = new BinaryKeyValueNode<double, Curve>(temp.X, crv);
+                        L.Add(node);
+                        doc.Objects.AddPoint(temp);
+                        T.DeleteNode(node);
+                    }
                 }
+                doc.Views.Redraw();
             }
             /*
             RhinoApp.WriteLine();
@@ -83,7 +117,7 @@ namespace binaryTreeExample.Commands
             IEnumerable inOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
             foreach (Double i in inOrder)
             {
-                RhinoApp.WriteLine("(" + i.ToString()+", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
+                RhinoApp.WriteLine("(" + Math.Round(i, 2).ToString()+", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
             }
 
             RhinoApp.WriteLine();
@@ -91,7 +125,7 @@ namespace binaryTreeExample.Commands
             IEnumerable postOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.PostOrder);
             foreach (Double i in postOrder)
             {
-                RhinoApp.WriteLine("(" + i.ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
+                RhinoApp.WriteLine("(" + Math.Round(i, 2).ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
             }
 
             RhinoApp.WriteLine();
@@ -99,7 +133,7 @@ namespace binaryTreeExample.Commands
             IEnumerable preOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.PreOrder);
             foreach (Double i in preOrder)
             {
-                RhinoApp.WriteLine("(" + i.ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
+                RhinoApp.WriteLine("(" + Math.Round(i, 2).ToString() + ", " + T.FindFirst(i) + ")"); //extract the value (Curve at this node)
             }
 
             RhinoApp.WriteLine();
@@ -110,7 +144,7 @@ namespace binaryTreeExample.Commands
                 double qY = Math.Round(pt.Y, 2);
                 RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
             }
-            */
+            
             RhinoApp.WriteLine();
 
             RhinoApp.Write("intPoints: ");
@@ -125,7 +159,7 @@ namespace binaryTreeExample.Commands
             }
             
             doc.Views.Redraw();
-
+            */
             return Result.Success;
         }
     }

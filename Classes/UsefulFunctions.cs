@@ -20,7 +20,7 @@ namespace binaryTreeExample.Classes
         /// </summary>
         /// <param name="lineCurves"></param>
         /// <param name="doc"></param>
-        public static Queue<Point3d> SweepLineDomain(List<Curve> lineCurves, RhinoDoc doc)
+        public static Queue<Point3d> EventPointQueue(List<Curve> lineCurves, RhinoDoc doc)
         {
             //1. initialize an empty queue of event points according to y position => sweep line status
             Queue<Point3d> Q = new Queue<Point3d>();
@@ -37,7 +37,7 @@ namespace binaryTreeExample.Classes
             Point3d ptEnd;
 
             int i = 0;
-            int j = lineCurves.Count;
+            int j = lineCurves.Count/2;
 
             foreach (Curve crv in lineCurves) // generate the array of points by selecting and inserting the point from segment
             {
@@ -60,7 +60,8 @@ namespace binaryTreeExample.Classes
             //if two event points have the same y-coordinate, then the one with smallest x-coordinate will be the first
             foreach (Point3d pt in Qs)
             {
-                Q.Enqueue(pt);
+                if (!Q.Contains(pt))
+                    Q.Enqueue(pt);
             }
 
             return Q;
