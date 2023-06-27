@@ -76,6 +76,7 @@ namespace binaryTreeExample.Commands
                 //the status structure must be dynamic: inserted and deleted segments as they appear and disappear
 
                 Point3d temp = Q.Dequeue();
+                Point3d tempNext = Q.Peek();
                 foreach (Curve crv in S)
                 {
                     // insert segments at start point and test intersection with adjacent segments in T
@@ -87,12 +88,12 @@ namespace binaryTreeExample.Commands
                         doc.Objects.AddPoint(temp);
                         // event points known beforehand / intersections points computed in the fly
                         // intersection points: test on the two segments immediately left & right
-                        intPoints = HandleEventPoint.IntersectionPt(temp, T);
+                        intPoints = HandleEventPoint.IntersectionPt(temp, T, doc);
                         if (intPoints != null)
                         {
                             foreach (Point3d pt in intPoints)
                             {
-                                doc.Objects.AddPoint(pt);
+                                
                                 Q.Enqueue(pt);  
                             }
                         }
@@ -109,7 +110,7 @@ namespace binaryTreeExample.Commands
                 }
                 doc.Views.Redraw();
             }
-            /*
+
             RhinoApp.WriteLine();
             int depth = T.Count;
             RhinoApp.WriteLine(depth.ToString());
@@ -159,7 +160,7 @@ namespace binaryTreeExample.Commands
             }
             
             doc.Views.Redraw();
-            */
+
             return Result.Success;
         }
     }

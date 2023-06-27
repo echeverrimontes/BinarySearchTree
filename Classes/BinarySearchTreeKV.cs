@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Rhino;
+using Rhino.Geometry;
 
 namespace binaryTreeExample.Classes
 {
-    public class BinarySearchTreeKV<TKey, TValue> where TKey : IComparable<TKey>
+    public class BinarySearchTreeKV<TKey, TValue> where TKey : IComparable<double>
     {
         // binary tree (max. 2 childs per node) with every node a key and
         // associated value. Also a BST has the property that for every node,
@@ -18,7 +19,7 @@ namespace binaryTreeExample.Classes
         private Random random;
 
         //2.Properties
-        private BinaryKeyValueNode<TKey, TValue> Root { get; set; }
+        private BinaryKeyValueNode<double, Curve> Root { get; set; }
 
         public int Count { get; protected set; }
 
@@ -32,43 +33,63 @@ namespace binaryTreeExample.Classes
         }
 
         //4.functions
-        public void Insert(TKey key, TValue value)
+        public void Insert(double key, Curve value)
         {
-            BinaryKeyValueNode<TKey, TValue> parent = null;
-            BinaryKeyValueNode<TKey, TValue> current = Root;
-            int compare = 0;
-            while (current != null)
+            BinaryKeyValueNode<double, Curve> newNode = new BinaryKeyValueNode<double, Curve>(key, value);
+            BinaryKeyValueNode<double, Curve> tempParent = null;
+            // case 1: insert first node
+            if (Root == null)
             {
-                parent = current;
-                compare = current.Key.CompareTo(key);
-                current = compare < 0 ? current.RightChild : current.LeftChild;
-            }
-            BinaryKeyValueNode<TKey, TValue> newNode = new BinaryKeyValueNode<TKey, TValue>(key, value);
-            if (parent != null)
-                if (compare < 0)
-                    parent.RightChild = newNode;
-                else
-                    parent.LeftChild = newNode;
-            else
                 Root = newNode;
-            newNode.Parent = parent;
+            }
+            // case 2: key < root.Key -> leftChild, key > root.Key -> rightChild
+            else
+            {
+                BinaryKeyValueNode<double, Curve> current = Root;
+                while (true)
+                {
+                    tempParent = current;
+                    if (Math.Round(newNode.Key) < Math.Round(tempParent.Key))
+                    {
+                        current = current.LeftChild;
+                        if (current == null)
+                        {
+                            tempParent.LeftChild = newNode;
+                            newNode.Parent = tempParent;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        current = current.RightChild;
+                        if (current == null)
+                        {
+                            tempParent.RightChild = newNode;
+                            newNode.Parent = tempParent;
+                            return;
+                        }
+                    }
+
+                }
+            }
+
             Count++;
         }
 
-        public TValue FindFirst(TKey key)
+        public Curve FindFirst(double key)
         {
             return FindNode(key).Value;
         }
 
-        public TValue FindFirstOrDefault(TKey key)
+        public Curve FindFirstOrDefault(double key)
         {
             var node = FindNode(key, false);
-            return node == null ? default(TValue) : node.Value;
+            return node == null ? default(Curve) : node.Value;
         }
 
-        public BinaryKeyValueNode<TKey, TValue> FindNode(TKey key, bool ExceptionIfKeyNotFound = true)
+        public BinaryKeyValueNode<double, Curve> FindNode(double key, bool ExceptionIfKeyNotFound = true)
         {
-            BinaryKeyValueNode<TKey, TValue> current = Root;
+            BinaryKeyValueNode<double, Curve> current = Root;
             while (current != null)
             {
                 int compare = current.Key.CompareTo(key);
@@ -85,54 +106,76 @@ namespace binaryTreeExample.Classes
                 return null;
         }
 
-        public void DeleteNode(BinaryKeyValueNode<TKey, TValue> node)
+        public void DeleteNode(BinaryKeyValueNode<double, Curve> node)
         {
+            // if the tree is empty
             if (node == null)
                 throw new ArgumentNullException();
-            if (node.LeftChild != null && node.RightChild != null) //2 childs  
+
+            // case 1: the node to be deleted is a leaf node - simply delete the node
+            if (node.LeftChild == null && node.RightChild == null)
             {
-                BinaryKeyValueNode<TKey, TValue> replaceBy = random.NextDouble() > .5 ? InOrderSuccesor(node) : InOrderPredecessor(node);
+                //DeleteNode(node);
+            }
+            // case 2: the node to be deleted has a single child node
+            // a. replace the node with its child node
+            // b. remove the child node from its original position
+            else 
+            {
+                if (node.LeftChild == null)
+                {
+                    BinaryKeyValueNode<double, Curve> child = node.RightChild;
+                    node.Parent.RightChild = child;
+                }
+                else if (node.RightChild == null)
+                {
+                    BinaryKeyValueNode<double, Curve> child = node.LeftChild;
+                    node.Parent.LeftChild = child;
+                }
+
+                DeleteNode(node);
+            }
+            // case 3: the node to be deleted has two children:
+            // a. get the inorder successor of that node
+            // b. replace the node with the inorder successor
+            // c. remove the inorder successor from its original position
+            if (node.LeftChild != null && node.RightChild != null)  
+            {
+                BinaryKeyValueNode<double, Curve> replaceBy = random.NextDouble() > .5 ? InOrderSuccesor(node) : InOrderPredecessor(node);
                 DeleteNode(replaceBy);
                 node.Value = replaceBy.Value;
                 node.Key = replaceBy.Key;
             }
-            else //1 or less childs  
-            {
-                BinaryKeyValueNode<TKey, TValue> child = node.LeftChild == null ? node.RightChild : node.LeftChild;
-                if (node.Parent.RightChild == node)
-                    node.Parent.RightChild = child;
-                else
-                    node.Parent.LeftChild = child;
-            }
+            
             Count--;
         }
 
-        private BinaryKeyValueNode<TKey, TValue> InOrderSuccesor(BinaryKeyValueNode<TKey, TValue> node)
+        private BinaryKeyValueNode<double, Curve> InOrderSuccesor(BinaryKeyValueNode<double, Curve> node)
         {
-            BinaryKeyValueNode<TKey, TValue> succesor = node.RightChild;
+            BinaryKeyValueNode<double, Curve> succesor = node.RightChild;
             while (succesor.LeftChild != null)
                 succesor = succesor.LeftChild;
             return succesor;
         }
 
-        private BinaryKeyValueNode<TKey, TValue> InOrderPredecessor(BinaryKeyValueNode<TKey, TValue> node)
+        private BinaryKeyValueNode<double, Curve> InOrderPredecessor(BinaryKeyValueNode<double, Curve> node)
         {
-            BinaryKeyValueNode<TKey, TValue> succesor = node.LeftChild;
+            BinaryKeyValueNode<double, Curve> succesor = node.LeftChild;
             while (succesor.RightChild != null)
                 succesor = succesor.RightChild;
             return succesor;
         }
 
-        public IEnumerable<TKey> TraverseTree(DepthFirstTraversalMethod method)
+        public IEnumerable<double> TraverseTree(DepthFirstTraversalMethod method)
         {
             return TraverseNode(Root, method);
         }
 
-        private IEnumerable<TKey> TraverseNode(BinaryKeyValueNode<TKey, TValue> node, DepthFirstTraversalMethod method)
+        private IEnumerable<double> TraverseNode(BinaryKeyValueNode<double, Curve> node, DepthFirstTraversalMethod method)
         {
-            IEnumerable<TKey> TraverseLeft = node.LeftChild == null ? new TKey[0] : TraverseNode(node.LeftChild, method),
-                TraverseRight = node.RightChild == null ? new TKey[0] : TraverseNode(node.RightChild, method),
-                Self = new TKey[1] { node.Key };
+            IEnumerable<double> TraverseLeft = node.LeftChild == null ? new double[0] : TraverseNode(node.LeftChild, method),
+                TraverseRight = node.RightChild == null ? new double[0] : TraverseNode(node.RightChild, method),
+                Self = new double[1] { node.Key };
             switch (method)
             {
                 case DepthFirstTraversalMethod.PreOrder:
