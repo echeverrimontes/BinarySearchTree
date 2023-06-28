@@ -28,25 +28,19 @@ namespace binaryTreeExample.Classes
             //2. list of points existing in the selection: select segment start and end points
             Point3d[] Qs = new Point3d[lineCurves.Count * 2];
             double[] QsY = new double[lineCurves.Count * 2];
-            int n = Qs.Length;
-
-            //3. initialize an empty list of max and mins
-            //calculate the span between the max and the min y values of the start
-            //and end points of the curves on the canvas regarding the y values
-            Point3d ptStart;
-            Point3d ptEnd;
 
             int i = 0;
-            int j = lineCurves.Count/2;
+            int j = lineCurves.Count;
 
             foreach (Curve crv in lineCurves) // generate the array of points by selecting and inserting the point from segment
             {
-                ptStart = crv.PointAtStart;
+                Point3d ptStart = crv.PointAtStart;
+                Point3d ptEnd = crv.PointAtEnd;
                 Qs[i] = ptStart;
                 QsY[i] = ptStart.Y;
-                ptEnd = crv.PointAtEnd;
                 Qs[j] = ptEnd;
                 QsY[j] = ptEnd.Y;
+
                 j += 1;
                 i += 1;
             }
@@ -55,15 +49,14 @@ namespace binaryTreeExample.Classes
             Array.Sort(QsY, Qs);
             Array.Reverse(Qs);
             //IntArrayQuickSort(Qs); // sorted array according to the Y coordinate
-
+            
             //5. enqueue the points in order of appearance from top to bottom
             //if two event points have the same y-coordinate, then the one with smallest x-coordinate will be the first
             foreach (Point3d pt in Qs)
             {
-                if (!Q.Contains(pt))
-                    Q.Enqueue(pt);
+                Q.Enqueue(pt);
             }
-
+            
             return Q;
         }
 
