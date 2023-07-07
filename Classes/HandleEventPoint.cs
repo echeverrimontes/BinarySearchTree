@@ -52,116 +52,110 @@ namespace binaryTreeExample.Classes
             Curve rightCurveP = null;
             double x = Math.Round(p.X, 2);
 
-            if (T != null)
+            // extract the value (Curve at this node)
+            BinaryKeyValueNode<double, Curve> nodeP = T.FindNode(x);
+            Curve crvP = nodeP.Value;
+            RhinoApp.WriteLine("(" + Math.Round(nodeP.Key, 2).ToString() + ", " + nodeP.Value.ToString() + ")");
+
+            // 1. search in T for the segment immediately to the left and right
+            // to some point p that lies on the sweep line:
+
+            if (nodeP.LeftChild != null)
             {
-                IEnumerable InOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
-                foreach (double i in InOrder)
+                BinaryKeyValueNode<double, Curve> leftChildP = nodeP.LeftChild;
+                leftCurveP = leftChildP.Value; // segment left to the event point p
+            }
+            if (nodeP.RightChild != null)
+            {
+                BinaryKeyValueNode<double, Curve> rightChildP = nodeP.RightChild;
+                rightCurveP = rightChildP.Value; // segment right to the event point p
+            }
+            // at each internal node nodeKV test whether p lies left or right of the segment stored at nodeKV
+            // depending on the outcome descend to left or right subtree of nodeKV, eventually ending up in a leaf
+            // either this leaf or the leaf immediately to the left or right of it stores the segment being searched for
+            IEnumerable InOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
+            foreach (double i in InOrder)
+            {
+                BinaryKeyValueNode<double, Curve> node = T.FindNode(i);
+                if (x < Math.Round(node.Key, 2)) // event point p lies to the left of nodeKV
                 {
-                    // extract the value (Curve at this node)
-                    BinaryKeyValueNode<double, Curve> nodeP = T.FindNode(i);
-                    //RhinoApp.WriteLine("(" + Math.Round(nodeP.Key, 2).ToString() + ", " + nodeP.Value.ToString() + ")");
-
-                    // 1. search in T for the segment immediately to the left and right
-                    // to some point p that lies on the sweep line:
-                    
-                    if (nodeP.LeftChild != null)
+                    if (leftCurveP != null)
                     {
-                        BinaryKeyValueNode<double, Curve> leftChildP = nodeP.LeftChild;
-                        leftCurveP = leftChildP.Value; // segment left to the event point p
-                    }
-                    if (nodeP.RightChild != null)
-                    {
-                        BinaryKeyValueNode<double, Curve> rightChildP = nodeP.RightChild;
-                        rightCurveP = rightChildP.Value; // segment right to the event point p
-                    }
-
-                    // at each internal node nodeKV test whether p lies left or right of the segment stored at nodeKV
-                    // depending on the outcome descend to left or right subtree of nodeKV, eventually ending up in a leaf
-                    // either this leaf or the leaf immediately to the left or right of it stores the segment being searched for
-                    foreach (double j in InOrder)
-                    {
-                        BinaryKeyValueNode<double, Curve> node = T.FindNode(j);
-                        if (x < Math.Round(node.Key, 2)) // event point p lies to the left of nodeKV
+                        LineCurve crv0 = leftCurveP as LineCurve;
+                        LineCurve crv1 = node.Value as LineCurve;
+                        if (crv0 == null || crv1 == null)
+                            return null;
+                        else if (crv0 != null || crv1 != null)
                         {
-                            if (leftCurveP != null)
+                            Line line0 = crv0.Line;
+                            Line line1 = crv1.Line;
+                            RhinoApp.WriteLine("(left: " + node.Value.ToString() + ", " + leftCurveP.ToString() + ")");
+                            /*
+                            CurveIntersections intPointl = Intersection.CurveCurve(node.Value, leftCurveP, 0.001, 0.01);
+                            IEnumerator<IntersectionEvent> intPointsl = intPointl.GetEnumerator();
+                            if (intPointsl != null)
                             {
-                                LineCurve crv0 = leftCurveP as LineCurve;
-                                LineCurve crv1 = node.Value as LineCurve;
-                                if (crv0 == null || crv1 == null)
-                                    return null;
-                                else if (crv0 != null || crv1 != null)
+                                while (intPointsl.MoveNext())
                                 {
-                                    Line line0 = crv0.Line;
-                                    Line line1 = crv1.Line;
-                                    RhinoApp.WriteLine("(left: " + node.Value.ToString() + ", " + leftCurveP.ToString() + ")");
-                                    /*
-                                    CurveIntersections intPointl = Intersection.CurveCurve(node.Value, leftCurveP, 0.001, 0.01);
-                                    IEnumerator<IntersectionEvent> intPointsl = intPointl.GetEnumerator();
-                                    if (intPointsl != null)
-                                    {
-                                        while (intPointsl.MoveNext())
-                                        {
-                                            IntersectionEvent pt = intPointsl.Current;
-                                            Point3d l = pt.PointA;
-                                            doc.Objects.AddPoint(l);
-                                            pts.Add(l);
-                                        }
-                                    }
-                                    */
-                                    double a, b;
-                                    if (!Intersection.LineLine(line0, line1, out a, out b))
-                                    {
-                                        RhinoApp.WriteLine("No intersection found.");
-                                        //return Rhino.Commands.Result.Nothing;
-                                    }
-                                    Point3d pt0 = line0.PointAt(a);
-                                    Point3d pt1 = line1.PointAt(b);
-                                    // pt0 and pt1 should be equal, so we will only add pt0 to the document
-                                    doc.Objects.AddPoint(pt0);
-                                    //doc.Views.Redraw();
+                                    IntersectionEvent pt = intPointsl.Current;
+                                    Point3d l = pt.PointA;
+                                    doc.Objects.AddPoint(l);
+                                    pts.Add(l);
                                 }
                             }
+                            */
+                            double a, b;
+                            if (!Intersection.LineLine(line0, line1, out a, out b))
+                            {
+                                RhinoApp.WriteLine("No intersection found.");
+                                //return Rhino.Commands.Result.Nothing;
+                            }
+                            Point3d pt0 = line0.PointAt(a);
+                            Point3d pt1 = line1.PointAt(b);
+                            // pt0 and pt1 should be equal, so we will only add pt0 to the document
+                            doc.Objects.AddPoint(pt0);
+                            //doc.Views.Redraw();
                         }
-                        else if (x > Math.Round(node.Key, 2)) // event point p lies to the right of nodeKV
+                    }
+                }
+                else if (x > Math.Round(node.Key, 2)) // event point p lies to the right of nodeKV
+                {
+                    if (rightCurveP != null)
+                    {
+                        LineCurve crv0 = rightCurveP as LineCurve;
+                        LineCurve crv1 = node.Value as LineCurve;
+                        if (crv0 == null || crv1 == null)
+                            return null;
+                        else if (crv0 != null || crv1 != null)
                         {
-                            if (rightCurveP != null)
+                            Line line0 = crv0.Line;
+                            Line line1 = crv1.Line;
+                            RhinoApp.WriteLine("(right: " + node.Value.ToString() + ", " + rightCurveP.ToString() + ")");
+                            /*
+                            CurveIntersections intPointr = Intersection.CurveCurve(node.Value, rightCurveP, 0.001, 0.01);
+                            IEnumerator<IntersectionEvent> intPointsr = intPointr.GetEnumerator();
+                            if (intPointsr != null)
                             {
-                                LineCurve crv0 = rightCurveP as LineCurve;
-                                LineCurve crv1 = node.Value as LineCurve;
-                                if (crv0 == null || crv1 == null)
-                                    return null;
-                                else if (crv0 != null || crv1 != null)
+                                while (intPointsr.MoveNext())
                                 {
-                                    Line line0 = crv0.Line;
-                                    Line line1 = crv1.Line;
-                                    RhinoApp.WriteLine("(right: " + node.Value.ToString() + ", " + rightCurveP.ToString() + ")");
-                                    /*
-                                    CurveIntersections intPointr = Intersection.CurveCurve(node.Value, rightCurveP, 0.001, 0.01);
-                                    IEnumerator<IntersectionEvent> intPointsr = intPointr.GetEnumerator();
-                                    if (intPointsr != null)
-                                    {
-                                        while (intPointsr.MoveNext())
-                                        {
-                                            IntersectionEvent pt = intPointsr.Current;
-                                            Point3d r = pt.PointA;
-                                            doc.Objects.AddPoint(r);
-                                            pts.Add(r);
-                                        }
-                                    }
-                                    */
-                                    double a, b;
-                                    if (!Intersection.LineLine(line0, line1, out a, out b))
-                                    {
-                                        RhinoApp.WriteLine("No intersection found.");
-                                        //return Rhino.Commands.Result.Nothing;
-                                    }
-                                    Point3d pt0 = line0.PointAt(a);
-                                    Point3d pt1 = line1.PointAt(b);
-                                    // pt0 and pt1 should be equal, so we will only add pt0 to the document
-                                    doc.Objects.AddPoint(pt0);
-                                    //doc.Views.Redraw();
+                                    IntersectionEvent pt = intPointsr.Current;
+                                    Point3d r = pt.PointA;
+                                    doc.Objects.AddPoint(r);
+                                    pts.Add(r);
                                 }
                             }
+                            */
+                            double a, b;
+                            if (!Intersection.LineLine(line0, line1, out a, out b))
+                            {
+                                RhinoApp.WriteLine("No intersection found.");
+                                //return Rhino.Commands.Result.Nothing;
+                            }
+                            Point3d pt0 = line0.PointAt(a);
+                            Point3d pt1 = line1.PointAt(b);
+                            // pt0 and pt1 should be equal, so we will only add pt0 to the document
+                            doc.Objects.AddPoint(pt0);
+                            //doc.Views.Redraw();
                         }
                     }
                 }

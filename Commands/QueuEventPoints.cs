@@ -82,7 +82,10 @@ namespace binaryTreeExample.Commands
                         // BinaryKeyValueNode<double, Curve> node = new BinaryKeyValueNode<double, Curve>(temp.X, crv);
                         T.Insert(temp.X, crv);
                         // intersection points: test on the two segments immediately left & right
-                        intPoints = HandleEventPoint.IntersectionPt(temp, T, doc);
+                        if (T != null)
+                        {
+                            intPoints = HandleEventPoint.IntersectionPt(temp, T, doc);
+                        }
                     }
                     else if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
                     {

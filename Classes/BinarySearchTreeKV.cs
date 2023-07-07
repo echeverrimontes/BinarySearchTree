@@ -89,7 +89,9 @@ namespace binaryTreeExample.Classes
 
         public BinaryKeyValueNode<double, Curve> FindNode(double key, bool ExceptionIfKeyNotFound = true)
         {
+
             BinaryKeyValueNode<double, Curve> current = Root;
+            
             while (current != null)
             {
                 int compare = current.Key.CompareTo(key);
