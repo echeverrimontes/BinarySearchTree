@@ -79,19 +79,18 @@ namespace binaryTreeExample.Commands
                     if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
                     {
                         doc.Objects.AddPoint(temp);
-                        // BinaryKeyValueNode<double, Curve> node = new BinaryKeyValueNode<double, Curve>(temp.X, crv);
                         T.Insert(temp.X, crv);
                         // intersection points: test on the two segments immediately left & right
-                        if (T != null)
-                        {
-                            intPoints = HandleEventPoint.IntersectionPt(temp, T, doc);
-                        }
+                        //if (T != null)
+                        //{
+                        //    intPoints = HandleEventPoint.IntersectionPt(temp, T, doc);
+                        //}
                     }
                     else if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
                     {
                         doc.Objects.AddPoint(temp);
                         BinaryKeyValueNode<double, Curve> node = new BinaryKeyValueNode<double, Curve>(temp.X, crv);
-                        T.DeleteNode(node);
+                        //T.DeleteNode(node);
                     }
                 }
             }
@@ -105,6 +104,26 @@ namespace binaryTreeExample.Commands
                 RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
             }
 
+            BinarySearchTreeKV<double, Curve> bst = new BinarySearchTreeKV<double, Curve>();
+            // Agregar nodos al árbol
+
+            List<Curve> inorderValues = bst.InOrderTraversal();
+            foreach (Curve value in inorderValues)
+            {
+                Console.WriteLine(value.ToString());
+            }
+
+            /*
+            RhinoApp.WriteLine();
+            IEnumerable InOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
+            foreach (double i in InOrder)
+            {
+                double j = Math.Round(i, 2);
+                BinaryKeyValueNode<double, Curve> node = T.FindIt(j);
+                //Curve crv = node.Value;
+                //RhinoApp.WriteLine("Node: " + node.Key.ToString() + ", " + node.Value.ToString());
+            }
+            */
             doc.Views.Redraw();
             return Result.Success;
         }
