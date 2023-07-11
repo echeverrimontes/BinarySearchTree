@@ -8,107 +8,152 @@ using Rhino.Geometry;
 
 namespace binaryTreeExample.Classes
 {
-    public class BinarySearchTreeKV<TKey, TValue> where TKey : IComparable<double>
+    public class BinarySearchTreeKV<KeyType, ValueType> where KeyType : IComparable<KeyType>
     {
         // binary tree (max. 2 childs per node) with every node a key and
         // associated value. Also a BST has the property that for every node,
         // the left subtree contains only nodes with a smaller (or equal) key and
         // the right subtree contains only nodes with strictly larger keys. 
+        // https://www.c-sharpcorner.com/UploadFile/ddb212/generic-binary-search-tree-with-keyed-values-using-C-Sharp/
 
         //1.Variables
         private Random random;
 
         //2.Properties
-        private BinaryKeyValueNode<double, Curve> Root { get; set; }
+        private BinaryKeyValueNode<KeyType, ValueType> Root;
 
         public int Count { get; protected set; }
 
         //3.constructor
         public BinarySearchTreeKV()
         {
-            Root = null;
+            Root = null; //empty tree declaration of the pointer for Root
             random = new Random(1);
             Count = 0;
 
         }
 
         //4.functions
-        public void Insert(double key, Curve value)
+        private BinaryKeyValueNode<KeyType, ValueType> InsertNode(BinaryKeyValueNode<KeyType, ValueType> node, KeyType key, ValueType value)
         {
-            BinaryKeyValueNode<double, Curve> newNode = new BinaryKeyValueNode<double, Curve>(key, value);
-            BinaryKeyValueNode<double, Curve> tempParent = null;
-            // case 1: insert first node
-            if (Root == null)
+            if (node == null)
             {
-                Root = newNode;
+                return new BinaryKeyValueNode<KeyType, ValueType>(key, value);
             }
-            // case 2: key < root.Key -> leftChild, key > root.Key -> rightChild
+
+            int comparison = key.CompareTo(node.Key);
+            if (comparison < 0)
+            {
+                node.LeftChild = InsertNode(node.LeftChild, key, value);
+            }
+            else if (comparison > 0)
+            {
+                node.RightChild = InsertNode(node.RightChild, key, value);
+            }
+
+            return node;
+        }
+
+        public void Insert(KeyType key, ValueType value)
+        {
+            Root = InsertNode(Root, key, value);
+        }
+
+        private ValueType SearchNode(BinaryKeyValueNode<KeyType, ValueType> node, KeyType key)
+        {
+            if (node == null || key.Equals(node.Key))
+            {
+                return node != null ? node.Value : default(ValueType); // Return default value if key not found
+            }
+
+            int comparison = key.CompareTo(node.Key);
+            if (comparison < 0)
+            {
+                return SearchNode(node.LeftChild, key);
+            }
+
+            return SearchNode(node.RightChild, key);
+        }
+
+        public ValueType Search(KeyType key)
+        {
+            return SearchNode(Root, key);
+        }
+
+        private BinaryKeyValueNode<KeyType, ValueType> DeleteNode(BinaryKeyValueNode<KeyType, ValueType> node, KeyType key)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+
+            int comparison = key.CompareTo(node.Key);
+            if (comparison < 0)
+            {
+                node.LeftChild = DeleteNode(node.LeftChild, key);
+            }
+            else if (comparison > 0)
+            {
+                node.RightChild = DeleteNode(node.RightChild, key);
+            }
             else
             {
-                BinaryKeyValueNode<double, Curve> current = Root;
-                while (true)
+                // Node to be deleted found
+                if (node.LeftChild == null)
                 {
-                    tempParent = current;
-                    if (Math.Round(newNode.Key) < Math.Round(tempParent.Key))
-                    {
-                        current = current.LeftChild;
-                        if (current == null)
-                        {
-                            tempParent.LeftChild = newNode;
-                            newNode.Parent = tempParent;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        current = current.RightChild;
-                        if (current == null)
-                        {
-                            tempParent.RightChild = newNode;
-                            newNode.Parent = tempParent;
-                            return;
-                        }
-                    }
-
+                    return node.RightChild;
+                }
+                else if (node.RightChild == null)
+                {
+                    return node.LeftChild;
+                }
+                else
+                {
+                    // Node has two children, find in-order successor (smallest key in the right subtree)
+                    BinaryKeyValueNode<KeyType, ValueType> successor = FindMinimum(node.RightChild);
+                    node.Key = successor.Key;
+                    node.Value = successor.Value;
+                    node.RightChild = DeleteNode(node.RightChild, successor.Key);
                 }
             }
 
-            Count++;
+            return node;
         }
 
-        public Curve FindFirst(double key)
+        public void Delete(KeyType key)
         {
-            return FindNode(key).Value;
+            Root = DeleteNode(Root, key);
         }
 
-        public Curve FindFirstOrDefault(double key)
+        private BinaryKeyValueNode<KeyType, ValueType> FindMinimum(BinaryKeyValueNode<KeyType, ValueType> node)
         {
-            var node = FindNode(key, false);
-            return node == null ? default(Curve) : node.Value;
-        }
-
-        public BinaryKeyValueNode<double, Curve> FindNode(double key, bool ExceptionIfKeyNotFound = true)
-        {
-
-            BinaryKeyValueNode<double, Curve> current = Root;
-            
-            while (current != null)
+            while (node.LeftChild != null)
             {
-                int compare = current.Key.CompareTo(key);
-                if (compare == 0)
-                    return current;
-                if (compare < 0)
-                    current = current.RightChild;
-                else
-                    current = current.LeftChild;
+                node = node.LeftChild;
             }
-            if (ExceptionIfKeyNotFound)
-                throw new KeyNotFoundException();
-            else
-                return null;
+
+            return node;
         }
 
-        public void DeleteNode(BinaryKeyValueNode<double, Curve> node)
+        private void InOrderTraversal(BinaryKeyValueNode<KeyType, ValueType> node, List<ValueType> values)
+        {
+            if (node != null)
+            {
+                InOrderTraversal(node.LeftChild, values);
+                values.Add(node.Value);
+                InOrderTraversal(node.RightChild, values);
+            }
+        }
+
+        public List<ValueType> InOrderTraversal()
+        {
+            List<ValueType> values = new List<ValueType>();
+            InOrderTraversal(Root, values);
+            return values;
+        }
+
+        /*
+        public void DeleteNode(BinaryKeyValueNode<KeyType, ValueType> node)
         {
             // if the tree is empty
             if (node == null)
@@ -126,12 +171,12 @@ namespace binaryTreeExample.Classes
             {
                 if (node.LeftChild == null)
                 {
-                    BinaryKeyValueNode<double, Curve> child = node.RightChild;
+                    BinaryKeyValueNode<KeyType, ValueType> child = node.RightChild;
                     node.Parent.RightChild = child;
                 }
                 else if (node.RightChild == null)
                 {
-                    BinaryKeyValueNode<double, Curve> child = node.LeftChild;
+                    BinaryKeyValueNode<KeyType, ValueType> child = node.LeftChild;
                     node.Parent.LeftChild = child;
                 }
 
@@ -143,7 +188,7 @@ namespace binaryTreeExample.Classes
             // c. remove the inorder successor from its original position
             if (node.LeftChild != null && node.RightChild != null)  
             {
-                BinaryKeyValueNode<double, Curve> replaceBy = random.NextDouble() > .5 ? InOrderSuccesor(node) : InOrderPredecessor(node);
+                BinaryKeyValueNode<KeyType, ValueType> replaceBy = random.NextDouble() > .5 ? InOrderSuccesor(node) : InOrderPredecessor(node);
                 DeleteNode(replaceBy);
                 node.Value = replaceBy.Value;
                 node.Key = replaceBy.Key;
@@ -200,6 +245,6 @@ namespace binaryTreeExample.Classes
             InOrder,
             PostOrder
         }
-
+        */
     }
 }

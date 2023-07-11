@@ -39,7 +39,7 @@ namespace binaryTreeExample.Classes
         //that is test a new segment only with the ones immediately left and right 
         //if (balanced)
         //{
-
+        /*
         public static List<Point3d> IntersectionPt(Point3d p, BinarySearchTreeKV<double, Curve> T, RhinoDoc doc)
         {
             // an event point p determines the status of the sweep line, 
@@ -53,8 +53,8 @@ namespace binaryTreeExample.Classes
             double x = Math.Round(p.X, 2);
 
             // extract the value (Curve at this node)
-            BinaryKeyValueNode<double, Curve> nodeP = T.FindNode(x);
-            Curve crvP = nodeP.Value;
+            Curve crvP = T.FindValue(x);
+            BinaryKeyValueNode<double, Curve> nodeP = T.Find(x);
             RhinoApp.WriteLine("(" + Math.Round(nodeP.Key, 2).ToString() + ", " + nodeP.Value.ToString() + ")");
 
             // 1. search in T for the segment immediately to the left and right
@@ -76,6 +76,9 @@ namespace binaryTreeExample.Classes
             IEnumerable InOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
             foreach (double i in InOrder)
             {
+                RhinoApp.WriteLine(i.ToString());
+            }
+            
                 BinaryKeyValueNode<double, Curve> node = T.FindNode(i);
                 if (x < Math.Round(node.Key, 2)) // event point p lies to the left of nodeKV
                 {
@@ -90,7 +93,7 @@ namespace binaryTreeExample.Classes
                             Line line0 = crv0.Line;
                             Line line1 = crv1.Line;
                             RhinoApp.WriteLine("(left: " + node.Value.ToString() + ", " + leftCurveP.ToString() + ")");
-                            /*
+  
                             CurveIntersections intPointl = Intersection.CurveCurve(node.Value, leftCurveP, 0.001, 0.01);
                             IEnumerator<IntersectionEvent> intPointsl = intPointl.GetEnumerator();
                             if (intPointsl != null)
@@ -103,7 +106,7 @@ namespace binaryTreeExample.Classes
                                     pts.Add(l);
                                 }
                             }
-                            */
+
                             double a, b;
                             if (!Intersection.LineLine(line0, line1, out a, out b))
                             {
@@ -131,7 +134,7 @@ namespace binaryTreeExample.Classes
                             Line line0 = crv0.Line;
                             Line line1 = crv1.Line;
                             RhinoApp.WriteLine("(right: " + node.Value.ToString() + ", " + rightCurveP.ToString() + ")");
-                            /*
+        
                             CurveIntersections intPointr = Intersection.CurveCurve(node.Value, rightCurveP, 0.001, 0.01);
                             IEnumerator<IntersectionEvent> intPointsr = intPointr.GetEnumerator();
                             if (intPointsr != null)
@@ -144,7 +147,7 @@ namespace binaryTreeExample.Classes
                                     pts.Add(r);
                                 }
                             }
-                            */
+
                             double a, b;
                             if (!Intersection.LineLine(line0, line1, out a, out b))
                             {
@@ -160,7 +163,7 @@ namespace binaryTreeExample.Classes
                     }
                 }
             }
-            return pts;
-        }
+            //return pts;
+        }*/
     }
 }
