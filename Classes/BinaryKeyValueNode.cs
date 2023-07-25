@@ -21,7 +21,5 @@ namespace binaryTreeExample.Classes
             LeftChild = null;
             RightChild = null;
         }
-
-
     }
 }

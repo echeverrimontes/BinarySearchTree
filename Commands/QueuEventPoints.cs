@@ -64,66 +64,59 @@ namespace binaryTreeExample.Commands
             }
 
             //4. populate the binary tree T with reference to the queue Q in a dynamic way while following the sweep line
+            List<Curve> U = new List<Curve>();
+            List<Curve> L = new List<Curve>();
+            List<Curve> C = new List<Curve>();
+
             while (Q.Count > 0) //event queue - sweep line
             {
                 // status structure T is an ordered sequence of segments intersecting the sweep line at each moment
                 // to access the neighbors of a given segment S so that they can be tested for intersection
                 // the status structure must be dynamic: inserted and deleted segments as they appear and disappear
-                
-                List<Point3d> intPoints = new List<Point3d>();
+
+                // each node contains attributes left, right, and p that point to the nodes corresponding 
+                // to its leftChild, rightChild, and its parent
+                // if any of the nodes is missing (child or parent) the attribute contains null
+
+                // keys always stored in such a way sa to satisfy binary-search-tree property:
+                // x = node, left subtree: y.key <= x.key; right subtree: y.key >= x.key
+
+                // A. Insert nodes from queu:
+
                 Point3d temp = Q.Dequeue();
-                //Point3d tempNext = Q.Peek();
+                double p = Math.Round(temp.X, 2);
                 foreach (Curve crv in S)
                 {
-                    // insert segments at start point 
-                    if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
+                    // insert segments at start point, the sweepline actualizes to the event point p
+                    if (Math.Round(crv.PointAtStart.Y, 2) ==  Math.Round(temp.Y, 2))
                     {
                         doc.Objects.AddPoint(temp);
-                        T.Insert(temp.X, crv);
-                        // intersection points: test on the two segments immediately left & right
-                        //if (T != null)
-                        //{
-                        //    intPoints = HandleEventPoint.IntersectionPt(temp, T, doc);
-                        //}
+                        U.Add(crv);
+                        T.Insert(Math.Round(p, 2), crv);
+
+                        // test for each node v in T if the event point p lies left or right (x coordinate value) 
+                        BinaryKeyValueNode<double, Curve> v = new BinaryKeyValueNode<double, Curve>(Math.Round(p, 2), crv);
+                        T.InOrderSearch(v, p);  
                     }
-                    else if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+
+                    // delete segment at end point
+                    if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
                     {
-                        doc.Objects.AddPoint(temp);
-                        BinaryKeyValueNode<double, Curve> node = new BinaryKeyValueNode<double, Curve>(temp.X, crv);
-                        //T.DeleteNode(node);
+                        T.Delete(temp.Y);
+                        if (U.Contains(crv))
+                        {
+                            L.Add(crv);
+                        }
+
                     }
                 }
             }
-            
+            // B. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
+            // by a simple recursive algorithm - inorder tree walk:
+
             RhinoApp.WriteLine();
-            RhinoApp.Write("Q: {0} ", Q.Count.ToString());
-            foreach (Point3d pt in Q)
-            {
-                double qX = Math.Round(pt.X, 2);
-                double qY = Math.Round(pt.Y, 2);
-                RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
-            }
+            T.InOrderTreeWalk(T.Root);
 
-            BinarySearchTreeKV<double, Curve> bst = new BinarySearchTreeKV<double, Curve>();
-            // Agregar nodos al árbol
-
-            List<Curve> inorderValues = bst.InOrderTraversal();
-            foreach (Curve value in inorderValues)
-            {
-                Console.WriteLine(value.ToString());
-            }
-
-            /*
-            RhinoApp.WriteLine();
-            IEnumerable InOrder = T.TraverseTree(BinarySearchTreeKV<double, Curve>.DepthFirstTraversalMethod.InOrder);
-            foreach (double i in InOrder)
-            {
-                double j = Math.Round(i, 2);
-                BinaryKeyValueNode<double, Curve> node = T.FindIt(j);
-                //Curve crv = node.Value;
-                //RhinoApp.WriteLine("Node: " + node.Key.ToString() + ", " + node.Value.ToString());
-            }
-            */
             doc.Views.Redraw();
             return Result.Success;
         }

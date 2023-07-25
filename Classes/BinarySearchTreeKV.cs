@@ -20,7 +20,7 @@ namespace binaryTreeExample.Classes
         private Random random;
 
         //2.Properties
-        private BinaryKeyValueNode<KeyType, ValueType> Root;
+        public BinaryKeyValueNode<KeyType, ValueType> Root;
 
         public int Count { get; protected set; }
 
@@ -145,13 +145,48 @@ namespace binaryTreeExample.Classes
             }
         }
 
-        public List<ValueType> InOrderTraversal()
+        /// <summary>
+        /// In Order traversal
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public List<ValueType> InOrderTraversal(BinaryKeyValueNode<KeyType, ValueType> node)
         {
             List<ValueType> values = new List<ValueType>();
             InOrderTraversal(Root, values);
             return values;
         }
 
+        /// <summary>
+        /// InOrder-Tree-Walk for printing out all keys in sorted order
+        /// </summary>
+        public void InOrderTreeWalk(BinaryKeyValueNode<KeyType, ValueType> node)
+        {
+            if (node != null)
+            {
+                InOrderTreeWalk(node.LeftChild);
+                RhinoApp.WriteLine(node.Key.ToString());
+                InOrderTreeWalk(node.RightChild);
+            }
+        }
+
+        /// <summary>
+        /// Search the tree T at each node v to test left or right to a point p
+        /// </summary>
+        /// <param name="node"></param>
+        public void InOrderSearch(BinaryKeyValueNode<KeyType, ValueType> node, double p)
+        {
+            if (node != null)
+            {
+                InOrderSearch(node.LeftChild, p);
+                if (Math.Round(p, 2).ToString() == node.LeftChild.Key.ToString()) // point lies left from v
+                {
+                    
+
+                }
+                InOrderSearch(node.RightChild, p);
+            }
+        }
         /*
         public void DeleteNode(BinaryKeyValueNode<KeyType, ValueType> node)
         {
