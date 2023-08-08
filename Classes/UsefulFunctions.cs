@@ -170,7 +170,19 @@ namespace binaryTreeExample.Classes
 
             return ptE;
         }
+        /*
+        public static Point3d FindNewEvent(Curve sl, Curve sr, Point3d p)
+        {
 
+            Point3d intPt = new Point3d();
+            if ()
+            {
+
+
+
+            }
+            return intPt;
+        }*/
         /// <summary>
         /// intersections using the dictionary key/value pair
         /// </summary>

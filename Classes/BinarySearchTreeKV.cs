@@ -4,7 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
+using Rhino.Geometry.Intersect;
+using Rhino.Input.Custom;
 
 namespace binaryTreeExample.Classes
 {
@@ -59,11 +62,11 @@ namespace binaryTreeExample.Classes
             Root = InsertNode(Root, key, value);
         }
 
-        private ValueType SearchNode(BinaryKeyValueNode<KeyType, ValueType> node, KeyType key)
+        private BinaryKeyValueNode<KeyType, ValueType> SearchNode(BinaryKeyValueNode<KeyType, ValueType> node, KeyType key)
         {
             if (node == null || key.Equals(node.Key))
             {
-                return node != null ? node.Value : default(ValueType); // Return default value if key not found
+                return node != null ? node : default; // Return default if key not found
             }
 
             int comparison = key.CompareTo(node.Key);
@@ -75,7 +78,7 @@ namespace binaryTreeExample.Classes
             return SearchNode(node.RightChild, key);
         }
 
-        public ValueType Search(KeyType key)
+        public BinaryKeyValueNode<KeyType, ValueType> Search(KeyType key)
         {
             return SearchNode(Root, key);
         }
@@ -170,23 +173,6 @@ namespace binaryTreeExample.Classes
             }
         }
 
-        /// <summary>
-        /// Search the tree T at each node v to test left or right to a point p
-        /// </summary>
-        /// <param name="node"></param>
-        public void InOrderSearch(BinaryKeyValueNode<KeyType, ValueType> node, double p)
-        {
-            if (node != null)
-            {
-                InOrderSearch(node.LeftChild, p);
-                if (Math.Round(p, 2).ToString() == node.LeftChild.Key.ToString()) // point lies left from v
-                {
-                    
-
-                }
-                InOrderSearch(node.RightChild, p);
-            }
-        }
         /*
         public void DeleteNode(BinaryKeyValueNode<KeyType, ValueType> node)
         {

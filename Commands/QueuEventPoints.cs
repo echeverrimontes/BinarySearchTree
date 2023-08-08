@@ -81,24 +81,90 @@ namespace binaryTreeExample.Commands
                 // keys always stored in such a way sa to satisfy binary-search-tree property:
                 // x = node, left subtree: y.key <= x.key; right subtree: y.key >= x.key
 
-                // A. Insert nodes from queu:
+                // A. Insert nodes from queu, find intersection points and enqueu:
 
                 Point3d temp = Q.Dequeue();
                 double p = Math.Round(temp.X, 2);
                 foreach (Curve crv in S)
                 {
+                    Point3d ptA = new Point3d();
+                    List<Point3d> intPt = new List<Point3d>();
+
                     // insert segments at start point, the sweepline actualizes to the event point p
-                    if (Math.Round(crv.PointAtStart.Y, 2) ==  Math.Round(temp.Y, 2))
+                    if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
                     {
                         doc.Objects.AddPoint(temp);
                         U.Add(crv);
                         T.Insert(Math.Round(p, 2), crv);
 
-                        // test for each node v in T if the event point p lies left or right (x coordinate value) 
-                        BinaryKeyValueNode<double, Curve> v = new BinaryKeyValueNode<double, Curve>(Math.Round(p, 2), crv);
-                        T.InOrderSearch(v, p);  
-                    }
+                        // Find all segments stored in T that contain p
+                        // if p = lower end point 
+                        if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+                        {
+                            L.Add(crv);
+                        }
+                        // if p = crv that contain p
+                        /*
+                        if ()
+                        {
+                            C.Add();
 
+                        }
+                        */
+                        // FindNewEvent(sl, sr, p):
+                        BinaryKeyValueNode<double, Curve> root = T.Root;
+                        Curve sl = root.LeftChild.Value;
+                        Curve sr = root.RightChild.Value;
+                        Point3d ptInt = UsefulFunctions.IntersectionPoint(sl, sr);
+                        if (ptInt != null && !Q.Contains(ptInt))
+                        {
+                            Q.Enqueue(ptInt);
+                        }
+
+
+                        /* BinaryKeyValueNode<double, Curve> node = T.Search(Math.Round(p, 2));
+                        // Curve crvP = node.Value;
+
+                        if (node.LeftChild != null)
+                        {
+                            Curve left = node.LeftChild.Value;
+                            // intersect segment on the left?
+                            CurveIntersections intLeft = Intersection.CurveCurve(crvP, left, 0.001, 0.001);
+
+                            if (intLeft.Count >= 1)
+                            {
+                                RhinoApp.WriteLine(intLeft.Count.ToString());
+                                ptA = intLeft[0].PointA;
+                                intPt.Add(ptA);
+                                doc.Objects.AddPoint(ptA);
+                                Q.Enqueue(ptA);
+                            }
+                            else
+                            {
+                                RhinoApp.WriteLine("there are no curve intersections with left segment");
+                            }
+                        }
+                        if (node.RightChild != null)
+                        {
+                            Curve right = node.RightChild.Value;
+                            // intersect segment on the right?
+                            CurveIntersections intRight = Intersection.CurveCurve(crvP, right, 0.001, 0.001);
+
+                            if (intRight.Count >= 1)
+                            {
+                                RhinoApp.WriteLine(intRight.Count.ToString());
+                                ptA = intRight[0].PointA;
+                                intPt.Add(ptA);
+                                doc.Objects.AddPoint(ptA);
+                                Q.Enqueue(ptA);
+                            }
+                            else
+                            {
+                                RhinoApp.WriteLine("there are no curve intersections with right segment");
+                            }
+                        }
+                    }
+                    
                     // delete segment at end point
                     if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
                     {
@@ -108,16 +174,17 @@ namespace binaryTreeExample.Commands
                             L.Add(crv);
                         }
 
+                    }*/
                     }
                 }
+                // B. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
+                // by a simple recursive algorithm - inorder tree walk:
+
+                RhinoApp.WriteLine();
+                T.InOrderTreeWalk(T.Root);
+                doc.Views.Redraw();
+                
             }
-            // B. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
-            // by a simple recursive algorithm - inorder tree walk:
-
-            RhinoApp.WriteLine();
-            T.InOrderTreeWalk(T.Root);
-
-            doc.Views.Redraw();
             return Result.Success;
         }
     }
