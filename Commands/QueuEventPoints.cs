@@ -1,6 +1,7 @@
 ﻿using Rhino;
 using Rhino.Commands;
 using System;
+using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,8 @@ using binaryTreeExample.Classes;
 using Eto.Forms;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
+using Rhino.Input.Custom;
+using Rhino.DocObjects;
 using Command = Rhino.Commands.Command;
 
 namespace binaryTreeExample.Commands
@@ -82,24 +85,45 @@ namespace binaryTreeExample.Commands
                 // x = node, left subtree: y.key <= x.key; right subtree: y.key >= x.key
 
                 // A. Insert nodes from queu, find intersection points and enqueu:
-
+                
                 Point3d temp = Q.Dequeue();
                 double p = Math.Round(temp.X, 2);
                 foreach (Curve crv in S)
                 {
+                    // select curve 
+                    GetObject go = new GetObject();
+                    //ObjRef crvOriginal = go.Object();
+
+                    // Crea un objeto de atributos y establece su color
+                    ObjectAttributes attributes = new ObjectAttributes();
+                    attributes.ObjectColor = Color.BlueViolet; // Cambia el color según tu preferencia
+
+                    // Agrega la curva al documento con los atributos de color
+                    Guid lineid = doc.Objects.AddCurve(crv, attributes); // RhinoObject.Id property
+
+                    doc.Views.Redraw();
+
                     Point3d ptA = new Point3d();
                     List<Point3d> intPt = new List<Point3d>();
-
+                    /*
                     // insert segments at start point, the sweepline actualizes to the event point p
                     if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
                     {
                         doc.Objects.AddPoint(temp);
                         U.Add(crv);
                         T.Insert(Math.Round(p, 2), crv);
+                        
+                        // Crea un objeto de atributos y establece su color
+                        ObjectAttributes attributes = new ObjectAttributes();
+                        attributes.ObjectColor = Color.Red; // Cambia el color según tu preferencia
+
+                        // Agrega la curva al documento con los atributos de color
+                        doc.Objects.AddCurve(crv, attributes);
+                        doc.Views.Redraw();
+                        
                     }
 
                     // find intersection of lines below event point
-
 
                     // delete segment at end point
                     if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
@@ -114,13 +138,15 @@ namespace binaryTreeExample.Commands
 
 
                     }
+                    */
                 }
+               
                 // B. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
                 // by a simple recursive algorithm - inorder tree walk:
 
                 RhinoApp.WriteLine();
                 T.InOrderTreeWalk(T.Root);
-                doc.Views.Redraw();
+                //doc.Views.Redraw();
                 
             }
             return Result.Success;
