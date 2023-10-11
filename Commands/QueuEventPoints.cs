@@ -48,6 +48,7 @@ namespace binaryTreeExample.Commands
 
             //2. set of segments for which we want to compute all intersections
             List<Curve> S = UsefulFunctions.SelectCurve();
+            //List<ObjRef> O = UsefulFunctions.SelectObjectRef();
 
             RhinoApp.WriteLine();
             RhinoApp.WriteLine("S: {0} ", S.Count.ToString());
@@ -102,60 +103,14 @@ namespace binaryTreeExample.Commands
                         T.Insert(Math.Round(p, 2), crv);
    
                     }
-
+            
                     // find intersection of lines below event point
                     // Select two curves to intersect from the binary search tree
+                    calculateIntersections intersections = new calculateIntersections(doc);
+                    Point3d intPt = intersections.interPoint(T, Math.Round(p, 2));
+                    Q.Enqueue(intPt);
 
-                    GetObject go = new GetObject();
-                    go.SetCommandPrompt("Select two curves");
-                    go.GeometryFilter = ObjectType.Curve;
-                    go.GetMultiple(2, 2);
-                    if (go.CommandResult() != Result.Success)
-                        return go.CommandResult();
-
-                    // Validate input
-                    Curve curveA = go.Object(0).Curve();
-                    Curve curveB = go.Object(1).Curve();
-                    if (curveA == null || curveB == null)
-                        return Rhino.Commands.Result.Failure;
-
-                    // Calculate the intersection
-                    const double intersection_tolerance = 0.001;
-                    const double overlap_tolerance = 0.0;
-                    var events = Rhino.Geometry.Intersect.Intersection.CurveCurve(curveA, curveB, intersection_tolerance, overlap_tolerance);
-
-                    // Process the results
-                    if (events != null)
-                    {
-                        for (int i = 0; i < events.Count; i++)
-                        {
-                            var ccx_event = events[i];
-                            doc.Objects.AddPoint(ccx_event.PointA);
-                            if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
-                            {
-                                doc.Objects.AddPoint(ccx_event.PointB);
-                                doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
-                            }
-                        }
-                        doc.Views.Redraw();
-                    }
-
-                    ObjRef obj_ref;
-                    Result rc = RhinoGet.GetOneObject("Select object", false, ObjectType.AnyObject, out obj_ref);
-                    if (rc != Result.Success)
-                        return rc;
-
-                    RhinoObject rhino_object = obj_ref.Object();
-                    Color color = rhino_object.Attributes.ObjectColor;
-                    bool b = Dialogs.ShowColorDialog(ref color);
-                    if (!b) return Result.Cancel;
-
-                    rhino_object.Attributes.ObjectColor = color;
-                    rhino_object.Attributes.ColorSource = ObjectColorSource.ColorFromObject;
-                    rhino_object.CommitChanges();
-
-                    doc.Views.Redraw();
-
+                    
                     // delete segment at end point
                     if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
                     {
@@ -168,6 +123,7 @@ namespace binaryTreeExample.Commands
                         T.Delete(temp.Y);
 
                     }
+
 
                 }
                 

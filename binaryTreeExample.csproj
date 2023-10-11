@@ -58,6 +58,7 @@
     <Compile Include="Classes\BinaryKeyValueNode.cs" />
     <Compile Include="Classes\BinarySearchTreeKV.cs" />
     <Compile Include="Classes\BinaryTree.cs" />
+    <Compile Include="Classes\calculateIntersections.cs" />
     <Compile Include="Classes\HandleEventPoint.cs" />
     <Compile Include="Classes\ObjectAtt.cs" />
     <Compile Include="Classes\TreeNode.cs" />

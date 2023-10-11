@@ -85,6 +85,7 @@ namespace binaryTreeExample.Classes
 
             for (int i = 0; i < gc.ObjectCount; i++)
             {
+                /*
                 ObjRef obj_ref = gc.Object(i);
 
                 // Obtiene los atributos actuales de la curva
@@ -101,7 +102,7 @@ namespace binaryTreeExample.Classes
 
                 // Actualiza la vista en Rhino para reflejar el cambio
                 RhinoDoc.ActiveDoc.Views.Redraw();
-
+                */
                 Curve crv = gc.Object(i).Curve();
 
                 if (null != crv)
@@ -149,7 +150,7 @@ namespace binaryTreeExample.Classes
         /// select objects in a document
         /// for evaluating the intersections one needs the objects
         /// <returns></returns>
-        public static List<Object> SelectObjects()
+        public static List<ObjRef> SelectObjectRef()
         {
             GetObject gc = new GetObject();
             gc.SetCommandPrompt("Select curves");
@@ -157,7 +158,7 @@ namespace binaryTreeExample.Classes
             gc.GetMultiple(1, 0);
 
             //Create collection of objects
-            List<Object> objects = new List<Object>(gc.ObjectCount);
+            List<ObjRef> objectRefs = new List<ObjRef>(gc.ObjectCount);
 
             for (int i = 0; i < gc.ObjectCount; i++)
             {
@@ -178,15 +179,15 @@ namespace binaryTreeExample.Classes
                 // Actualiza la vista en Rhino para reflejar el cambio
                 RhinoDoc.ActiveDoc.Views.Redraw();
 
-                Object obj = gc.Object(i);
+                ObjRef objRef = gc.Object(i);
 
-                if (null != obj)
+                if (null != objRef)
                 {
-                    objects.Add(obj);
+                    objectRefs.Add(objRef);
                 }
             }
 
-            return objects;
+            return objectRefs;
         }
         /// <summary>
         /// Select StartPoints for line segments
