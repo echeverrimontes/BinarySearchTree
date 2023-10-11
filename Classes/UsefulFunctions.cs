@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Rhino;
+using Rhino.UI;
+using Rhino.Commands;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
@@ -82,7 +85,25 @@ namespace binaryTreeExample.Classes
 
             for (int i = 0; i < gc.ObjectCount; i++)
             {
+                ObjRef obj_ref = gc.Object(i);
+
+                // Obtiene los atributos actuales de la curva
+                RhinoObject rhino_object = obj_ref.Object();
+                Color color = rhino_object.Attributes.ObjectColor;
+                bool b = Dialogs.ShowColorDialog(ref color);
+                //if (!b) return Result.Cancel;
+
+                // Modifica los atributos según necesidades
+                // Actualiza los atributos de la curva
+                rhino_object.Attributes.ObjectColor = color;
+                rhino_object.Attributes.ColorSource = ObjectColorSource.ColorFromObject;
+                rhino_object.CommitChanges();
+
+                // Actualiza la vista en Rhino para reflejar el cambio
+                RhinoDoc.ActiveDoc.Views.Redraw();
+
                 Curve crv = gc.Object(i).Curve();
+
                 if (null != crv)
                 {
                     crvs.Add(crv);
@@ -124,6 +145,49 @@ namespace binaryTreeExample.Classes
             return crvs;
         }
 
+        /// <summary>
+        /// select objects in a document
+        /// for evaluating the intersections one needs the objects
+        /// <returns></returns>
+        public static List<Object> SelectObjects()
+        {
+            GetObject gc = new GetObject();
+            gc.SetCommandPrompt("Select curves");
+            gc.GeometryFilter = ObjectType.Curve;
+            gc.GetMultiple(1, 0);
+
+            //Create collection of objects
+            List<Object> objects = new List<Object>(gc.ObjectCount);
+
+            for (int i = 0; i < gc.ObjectCount; i++)
+            {
+                ObjRef obj_ref = gc.Object(i);
+
+                // Obtiene los atributos actuales de la curva
+                RhinoObject rhino_object = obj_ref.Object();
+                Color color = rhino_object.Attributes.ObjectColor;
+                bool b = Dialogs.ShowColorDialog(ref color);
+                //if (!b) return Result.Cancel;
+
+                // Modifica los atributos según necesidades
+                // Actualiza los atributos de la curva
+                rhino_object.Attributes.ObjectColor = color;
+                rhino_object.Attributes.ColorSource = ObjectColorSource.ColorFromObject;
+                rhino_object.CommitChanges();
+
+                // Actualiza la vista en Rhino para reflejar el cambio
+                RhinoDoc.ActiveDoc.Views.Redraw();
+
+                Object obj = gc.Object(i);
+
+                if (null != obj)
+                {
+                    objects.Add(obj);
+                }
+            }
+
+            return objects;
+        }
         /// <summary>
         /// Select StartPoints for line segments
         /// </summary>

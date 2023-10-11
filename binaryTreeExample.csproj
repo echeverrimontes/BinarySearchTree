@@ -59,6 +59,7 @@
     <Compile Include="Classes\BinarySearchTreeKV.cs" />
     <Compile Include="Classes\BinaryTree.cs" />
     <Compile Include="Classes\HandleEventPoint.cs" />
+    <Compile Include="Classes\ObjectAtt.cs" />
     <Compile Include="Classes\TreeNode.cs" />
     <Compile Include="Classes\UsefulFunctions.cs" />
     <Compile Include="Commands\QueuEventPoints.cs" />
