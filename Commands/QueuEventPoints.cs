@@ -101,16 +101,17 @@ namespace binaryTreeExample.Commands
                         doc.Objects.AddPoint(temp);
                         U.Add(crv);
                         T.Insert(Math.Round(p, 2), crv);
-   
-                    }
-            
-                    // find intersection of lines below event point
-                    // Select two curves to intersect from the binary search tree
-                    calculateIntersections intersections = new calculateIntersections(doc);
-                    Point3d intPt = intersections.interPoint(T, Math.Round(p, 2));
-                    Q.Enqueue(intPt);
 
-                    
+                    }
+                }
+
+                // find intersection of lines below event point
+                // Select two curves to intersect from the binary search tree
+                calculateIntersections intersections = new calculateIntersections(doc);
+                Point3d intPt = intersections.interPoint(T, Math.Round(p, 2));
+                Q.Enqueue(intPt);
+
+                    /*
                     // delete segment at end point
                     if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
                     {
@@ -123,9 +124,7 @@ namespace binaryTreeExample.Commands
                         T.Delete(temp.Y);
 
                     }
-
-
-                }
+                    */
                 
                 // B. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
                 // by a simple recursive algorithm - inorder tree walk:
