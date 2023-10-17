@@ -48,7 +48,7 @@ namespace binaryTreeExample.Commands
 
             //2. set of segments for which we want to compute all intersections
             List<Curve> S = UsefulFunctions.SelectCurve();
-            //List<ObjRef> O = UsefulFunctions.SelectObjectRef();
+            List<Point3d> intPts = new List<Point3d>();
 
             RhinoApp.WriteLine();
             RhinoApp.WriteLine("S: {0} ", S.Count.ToString());
@@ -58,7 +58,7 @@ namespace binaryTreeExample.Commands
             }
 
             //3. initialize the queue for the event points 
-            Queue<Point3d> Q = new Queue<Point3d>();
+            Queue<Point3d> Q;
             Q = UsefulFunctions.EventPointQueue(S, doc); // and ordered queue according to the y coordinate - regarding the sweep line
 
             RhinoApp.WriteLine();
@@ -71,10 +71,6 @@ namespace binaryTreeExample.Commands
             }
 
             //4. populate the binary tree T with reference to the queue Q in a dynamic way while following the sweep line
-            List<Curve> U = new List<Curve>();
-            List<Curve> L = new List<Curve>();
-            List<Curve> C = new List<Curve>();
-
             while (Q.Count > 0) //event queue - sweep line
             {
                 // status structure T is an ordered sequence of segments intersecting the sweep line at each moment
@@ -89,51 +85,52 @@ namespace binaryTreeExample.Commands
                 // x = node, left subtree: y.key <= x.key; right subtree: y.key >= x.key
 
                 // A. Insert nodes from queu, find intersection points and enqueu:
-                
                 Point3d temp = Q.Dequeue();
                 double p = Math.Round(temp.X, 2);
                 foreach (Curve crv in S)
                 {
-
                     // insert segments at start point, the sweepline actualizes to the event point p
                     if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
                     {
-                        doc.Objects.AddPoint(temp);
-                        U.Add(crv);
                         T.Insert(Math.Round(p, 2), crv);
-
                     }
                 }
 
-                // find intersection of lines below event point
-                // Select two curves to intersect from the binary search tree
-                calculateIntersections intersections = new calculateIntersections(doc);
-                Point3d intPt = intersections.interPoint(T, Math.Round(p, 2));
-                Q.Enqueue(intPt);
-
-                    /*
-                    // delete segment at end point
-                    if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
-                    {
-                        doc.Objects.AddPoint(temp);
-                        if (U.Contains(crv))
-                        {
-                            L.Add(crv);
-                        }
-
-                        T.Delete(temp.Y);
-
-                    }
-                    */
-                
-                // B. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
-                // by a simple recursive algorithm - inorder tree walk:
-
-                RhinoApp.WriteLine();
-                T.InOrderTreeWalk(T.Root);
-                //doc.Views.Redraw();
-                
+                // B. Find intersection of lines below event point
+                // Select two curves to proof for intersection from the binary search tree: node / node.LeftChild / node.RightChild
+                intPts = T.InOrderTreeWalk(T.Root, doc, Q);
+                /*
+                // C. Delete segment at end point
+                if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+                {
+                    T.Delete(temp.Y);
+                }
+                */
             }
+
+            // D. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
+            // by a simple recursive algorithm - inorder tree walk:
+
+            RhinoApp.WriteLine();
+            RhinoApp.WriteLine();
+            //List<Point3d> intPts = T.InOrderTreeWalk(T.Root, doc, Q);
+
+            RhinoApp.WriteLine();
+            RhinoApp.Write("Q: {0} ", Q.Count.ToString());
+            foreach (Point3d pt in Q)
+            {
+                double qX = Math.Round(pt.X, 2);
+                double qY = Math.Round(pt.Y, 2);
+                RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
+            }
+
+            foreach (Point3d pt in intPts)
+            {
+                double qX = Math.Round(pt.X, 2);
+                double qY = Math.Round(pt.Y, 2);
+                RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
+            }
+
             return Result.Success;
         }
     }

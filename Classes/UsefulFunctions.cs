@@ -58,6 +58,7 @@ namespace binaryTreeExample.Classes
             foreach (Point3d pt in Qs)
             {
                 Q.Enqueue(pt);
+                doc.Objects.AddPoint(pt);
             }
             
             return Q;

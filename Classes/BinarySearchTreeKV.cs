@@ -163,14 +163,74 @@ namespace binaryTreeExample.Classes
         /// <summary>
         /// InOrder-Tree-Walk for printing out all keys in sorted order
         /// </summary>
-        public void InOrderTreeWalk(BinaryKeyValueNode<KeyType, ValueType> node)
+        public List<Point3d> InOrderTreeWalk(BinaryKeyValueNode<double, Curve> node, RhinoDoc doc, Queue<Point3d> Q)
         {
+            List<Point3d> intPts = new List<Point3d>();
             if (node != null)
             {
-                InOrderTreeWalk(node.LeftChild);
+                if (node.LeftChild != null)
+                {
+                    Curve curveA = node.Value;
+                    Curve curveL = node.LeftChild.Value;
+                    
+                    // Calculate the intersection
+                    CurveIntersections events1 = Intersection.CurveCurve(curveA, curveL,
+                        0.001, 0.00);
+
+                    // Process the results
+                    if (events1 != null)
+                    {
+                        for (int i = 0; i < events1.Count; i++)
+                        {
+                            IntersectionEvent ccx_event = events1[i];
+                            doc.Objects.AddPoint(ccx_event.PointA);
+                            intPts.Add(ccx_event.PointA);
+                            Q.Enqueue(ccx_event.PointA);
+                            if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
+                            {
+                                doc.Objects.AddPoint(ccx_event.PointB);
+                                intPts.Add(ccx_event.PointB);
+                                doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
+                            }
+                        }
+                        doc.Views.Redraw();
+                    }
+                    
+                }
+                if (node.RightChild != null)
+                {
+                    Curve curveA = node.Value;
+                    Curve curveR = node.RightChild.Value;
+
+                    // Calculate the intersection
+                    CurveIntersections events2 = Intersection.CurveCurve(curveA, curveR,
+                        0.001, 0.00);
+                    // Process the results
+                    
+                    if (events2 != null)
+                    {
+                        for (int i = 0; i < events2.Count; i++)
+                        {
+                            IntersectionEvent ccx_event = events2[i];
+                            doc.Objects.AddPoint(ccx_event.PointA);
+                            intPts.Add(ccx_event.PointA);
+                            Q.Enqueue(ccx_event.PointA);
+                            if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
+                            {
+                                doc.Objects.AddPoint(ccx_event.PointB);
+                                intPts.Add(ccx_event.PointB);
+                                doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
+                            }
+                        }
+                        doc.Views.Redraw();
+                    }
+                }
+                InOrderTreeWalk(node.LeftChild, doc, Q);
                 RhinoApp.WriteLine(node.Key.ToString());
-                InOrderTreeWalk(node.RightChild);
+                InOrderTreeWalk(node.RightChild, doc, Q);
             }
+
+            return intPts;
         }
 
         /*
