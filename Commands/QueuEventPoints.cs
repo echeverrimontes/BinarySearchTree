@@ -95,17 +95,25 @@ namespace binaryTreeExample.Commands
                         T.Insert(Math.Round(p, 2), crv);
                     }
                 }
-
+                
                 // B. Find intersection of lines below event point
                 // Select two curves to proof for intersection from the binary search tree: node / node.LeftChild / node.RightChild
                 intPts = T.InOrderTreeWalk(T.Root, doc, Q);
                 /*
-                // C. Delete segment at end point
-                if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+                if (intPt != null)
                 {
-                    T.Delete(temp.Y);
+                    Q.Enqueue(intPt);
                 }
                 */
+                // C. Delete segment at end point
+                foreach (Curve crv in S)
+                {
+                    if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+                    {
+                        T.Delete(temp.Y);
+                    }
+                }
+
             }
 
             // D. the binary-search-tree property allows us to print out all the keys in a bst in sorted order

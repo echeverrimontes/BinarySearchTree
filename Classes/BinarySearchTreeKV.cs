@@ -166,6 +166,7 @@ namespace binaryTreeExample.Classes
         public List<Point3d> InOrderTreeWalk(BinaryKeyValueNode<double, Curve> node, RhinoDoc doc, Queue<Point3d> Q)
         {
             List<Point3d> intPts = new List<Point3d>();
+            Point3d intPt = new Point3d();
             if (node != null)
             {
                 if (node.LeftChild != null)
@@ -185,7 +186,7 @@ namespace binaryTreeExample.Classes
                             IntersectionEvent ccx_event = events1[i];
                             doc.Objects.AddPoint(ccx_event.PointA);
                             intPts.Add(ccx_event.PointA);
-                            Q.Enqueue(ccx_event.PointA);
+                            //Q.Enqueue(ccx_event.PointA);
                             if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
                             {
                                 doc.Objects.AddPoint(ccx_event.PointB);
@@ -214,7 +215,7 @@ namespace binaryTreeExample.Classes
                             IntersectionEvent ccx_event = events2[i];
                             doc.Objects.AddPoint(ccx_event.PointA);
                             intPts.Add(ccx_event.PointA);
-                            Q.Enqueue(ccx_event.PointA);
+                            //Q.Enqueue(ccx_event.PointA);
                             if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
                             {
                                 doc.Objects.AddPoint(ccx_event.PointB);
@@ -231,6 +232,71 @@ namespace binaryTreeExample.Classes
             }
 
             return intPts;
+        }
+
+        public Point3d IntersectionPt(BinaryKeyValueNode<double, Curve> node, RhinoDoc doc)
+        {
+            Point3d intPt = new Point3d();
+            if (node != null)
+            {
+                if (node.LeftChild != null)
+                {
+                    Curve curveA = node.Value;
+                    Curve curveL = node.LeftChild.Value;
+
+                    // Calculate the intersection
+                    CurveIntersections events1 = Intersection.CurveCurve(curveA, curveL,
+                        0.001, 0.00);
+
+                    // Process the results
+                    if (events1 != null)
+                    {
+                        for (int i = 0; i < events1.Count; i++)
+                        {
+                            IntersectionEvent ccx_event = events1[i];
+                            doc.Objects.AddPoint(ccx_event.PointA);
+                            intPt = ccx_event.PointA;
+                            if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
+                            {
+                                doc.Objects.AddPoint(ccx_event.PointB);
+                                intPt = ccx_event.PointB;
+                                doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
+                            }
+                        }
+                        doc.Views.Redraw();
+                    }
+
+                }
+                if (node.RightChild != null)
+                {
+                    Curve curveA = node.Value;
+                    Curve curveR = node.RightChild.Value;
+
+                    // Calculate the intersection
+                    CurveIntersections events2 = Intersection.CurveCurve(curveA, curveR,
+                        0.001, 0.00);
+                    // Process the results
+
+                    if (events2 != null)
+                    {
+                        for (int i = 0; i < events2.Count; i++)
+                        {
+                            IntersectionEvent ccx_event = events2[i];
+                            doc.Objects.AddPoint(ccx_event.PointA);
+                            intPt = ccx_event.PointA;
+                            if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
+                            {
+                                doc.Objects.AddPoint(ccx_event.PointB);
+                                intPt = ccx_event.PointB;
+                                doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
+                            }
+                        }
+                        doc.Views.Redraw();
+                    }
+                }
+            }
+
+            return intPt;
         }
 
         /*
