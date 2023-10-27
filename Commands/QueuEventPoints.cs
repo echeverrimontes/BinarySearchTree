@@ -48,6 +48,7 @@ namespace binaryTreeExample.Commands
 
             //2. set of segments for which we want to compute all intersections
             List<Curve> S = UsefulFunctions.SelectCurve();
+            List<List<Point3d>> intersections = new List<List<Point3d>>();
             List<Point3d> intPts = new List<Point3d>();
 
             RhinoApp.WriteLine();
@@ -86,25 +87,106 @@ namespace binaryTreeExample.Commands
 
                 // A. Insert nodes from queu, find intersection points and enqueu:
                 Point3d temp = Q.Dequeue();
-                double p = Math.Round(temp.X, 2);
+                double p = Math.Round(temp.X, 2);    
                 foreach (Curve crv in S)
                 {
-                    // insert segments at start point, the sweepline actualizes to the event point p
+                    // A. insert segments at start point, the sweepline actualizes to the event point p
                     if (Math.Round(crv.PointAtStart.Y, 2) == Math.Round(temp.Y, 2))
                     {
-                        T.Insert(Math.Round(p, 2), crv);
+                        T.Insert(Math.Round(p, 2), crv); // update sweepline status + curve
+                        // AA. Find intersection of lines below event point
+                        // Select two curves to proof for intersection from the binary search tree: node / node.LeftChild / node.RightChild
+                        //intPts = T.InOrderTreeWalk(T.Root, doc, Q);
+                        BinaryKeyValueNode<double, Curve> node = T.Search(Math.Round(p, 2));
+                        if (node != null)
+                        {
+                            if (node.LeftChild != null)
+                            {
+                                Curve curveA = node.Value;
+                                Curve curveL = node.LeftChild.Value;
+
+                                // Calculate the intersection
+                                CurveIntersections events1 = Intersection.CurveCurve(curveA, curveL,
+                                    0.001, 0.00);
+
+                                // Process the results
+                                if (events1 != null)
+                                {
+                                    for (int i = 0; i < events1.Count; i++)
+                                    {
+                                        IntersectionEvent ccx_event = events1[i];
+                                        if (intPts.Contains(ccx_event.PointA))
+                                        {
+                                            RhinoApp.WriteLine("Already in the list");
+                                        }
+                                        else
+                                        {
+                                            doc.Objects.AddPoint(ccx_event.PointA);
+                                            intPts.Add(ccx_event.PointA);
+                                            Q.Enqueue(ccx_event.PointA);
+                                        }
+
+                                        if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
+                                        {
+                                            doc.Objects.AddPoint(ccx_event.PointB);
+                                            intPts.Add(ccx_event.PointB);
+                                            doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
+                                        }
+
+                                    }
+                                    doc.Views.Redraw();
+                                }
+
+                            }
+                            if (node.RightChild != null)
+                            {
+                                Curve curveA = node.Value;
+                                Curve curveR = node.RightChild.Value;
+
+                                // Calculate the intersection
+                                CurveIntersections events2 = Intersection.CurveCurve(curveA, curveR,
+                                    0.001, 0.00);
+                                // Process the results
+
+                                if (events2 != null)
+                                {
+                                    for (int i = 0; i < events2.Count; i++)
+                                    {
+                                        IntersectionEvent ccx_event = events2[i];
+                                        if (intPts.Contains(ccx_event.PointA))
+                                        {
+                                            RhinoApp.WriteLine("Already in the list");
+                                        }
+                                        else
+                                        {
+                                            doc.Objects.AddPoint(ccx_event.PointA);
+                                            intPts.Add(ccx_event.PointA);
+                                            Q.Enqueue(ccx_event.PointA);
+                                        }
+
+                                        if (ccx_event.PointA.DistanceTo(ccx_event.PointB) > double.Epsilon)
+                                        {
+                                            doc.Objects.AddPoint(ccx_event.PointB);
+                                            intPts.Add(ccx_event.PointB);
+                                            doc.Objects.AddLine(ccx_event.PointA, ccx_event.PointB);
+                                        }
+
+                                    }
+                                    doc.Views.Redraw();
+                                }
+                            }
+                        }
+                    }
+                    // B. Delete segment at end point
+                    else if (Math.Round(crv.PointAtEnd.Y, 2) == Math.Round(temp.Y, 2))
+                    {
+                        T.Delete(temp.Y); // update sweepline status - curve
+                        // BB. Find intersection of lines below event point
+                        // Select two curves to proof for intersection from the binary search tree: node / node.LeftChild / node.RightChild
+                        // intPts = T.InOrderTreeWalk(T.Root, doc, Q);
                     }
                 }
-                
-                // B. Find intersection of lines below event point
-                // Select two curves to proof for intersection from the binary search tree: node / node.LeftChild / node.RightChild
-                intPts = T.InOrderTreeWalk(T.Root, doc, Q);
                 /*
-                if (intPt != null)
-                {
-                    Q.Enqueue(intPt);
-                }
-                */
                 // C. Delete segment at end point
                 foreach (Curve crv in S)
                 {
@@ -113,15 +195,15 @@ namespace binaryTreeExample.Commands
                         T.Delete(temp.Y);
                     }
                 }
-
+                */
+                if (intPts != null)
+                {
+                    intersections.Add(intPts);
+                }
             }
 
             // D. the binary-search-tree property allows us to print out all the keys in a bst in sorted order
             // by a simple recursive algorithm - inorder tree walk:
-
-            RhinoApp.WriteLine();
-            RhinoApp.WriteLine();
-            //List<Point3d> intPts = T.InOrderTreeWalk(T.Root, doc, Q);
 
             RhinoApp.WriteLine();
             RhinoApp.Write("Q: {0} ", Q.Count.ToString());
@@ -132,11 +214,16 @@ namespace binaryTreeExample.Commands
                 RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
             }
 
-            foreach (Point3d pt in intPts)
+            RhinoApp.WriteLine();
+            RhinoApp.Write("intersections: {0} ", intersections.Count.ToString());
+            foreach (List<Point3d> pts in intersections)
             {
-                double qX = Math.Round(pt.X, 2);
-                double qY = Math.Round(pt.Y, 2);
-                RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
+                foreach (Point3d pt in pts)
+                {
+                    double qX = Math.Round(pt.X, 2);
+                    double qY = Math.Round(pt.Y, 2);
+                    RhinoApp.Write(" (" + qX.ToString() + ", " + qY.ToString() + ") ");
+                }
             }
 
             return Result.Success;
